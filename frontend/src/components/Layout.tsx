@@ -21,9 +21,9 @@ const Layout: React.FC = () => {
             </main>
 
             {/* Footer */}
-            <footer className="bg-gray-100 text-center p-4">
+            {/* <footer className="bg-gray-100 text-center p-4">
                 <p className="text-sm text-gray-500">© 2025 Sharetea. All rights reserved.</p>
-            </footer>
+            </footer> */}
         </div>
     );
 };
