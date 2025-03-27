@@ -7,6 +7,7 @@ import CustomizationModal from "../components/CustomizationModal";
 const MenuPage: React.FC = () => {
   const [products, setProducts] = useState<IProduct[]>([]);
   const [ingredients, setIngredients] = useState<IIngredient[]>([]);
+  const [totals, setTotals] = useState([0, 0, 0]) // subtotal, tax, total
 
   const [cart, setCart] = useState<IProduct[]>([]);
 
@@ -23,7 +24,33 @@ const MenuPage: React.FC = () => {
   }
 
   const addProductToCart = (product: IProduct) => {
-    setCart([...cart, product])
+    const newCart = [...cart, product];
+    
+    setCart(newCart);
+    updateTotals(newCart);
+  }
+
+  const updateTotals = (cart: IProduct[]) => {
+    let newSubtotal = 0;
+    
+    for(const product of cart) {
+      newSubtotal += product.price;
+    }
+
+    const taxTotal = newSubtotal * 0.0825
+    const newTotal = newSubtotal + taxTotal;
+
+    setTotals([newSubtotal, taxTotal, newTotal])
+  }
+
+  const submitOrder = () => {
+    resetOrder()
+  }
+  const resetOrder = () => {
+    const newCart: IProduct[] = [];
+
+    setCart(newCart);
+    updateTotals(newCart)
   }
 
   useEffect(() => {
@@ -77,25 +104,25 @@ const MenuPage: React.FC = () => {
             <div className="flex justify-between">
               <p>Subtotal</p>
 
-              <p>$12.00</p>
+              <p>${totals[0].toFixed(2)}</p>
             </div>
 
             <div className="flex justify-between">
               <p>Tax 8.25%</p>
 
-              <p>$12.00</p>
+              <p>${totals[1].toFixed(2)}</p>
             </div>
 
             <div className="flex justify-between text-2xl font-bold">
               <p>Total</p>
 
-              <p>$12.00</p>
+              <p>${totals[2].toFixed(2)}</p>
             </div>
 
             <div className="flex gap-x-8 my-8">
-              <button className="bg-red-500 text-white p-3 rounded-2xl w-full hover:bg-red-600 cursor-pointer">Cancel Order</button>
+              <button className="bg-red-500 text-white p-3 rounded-2xl w-full hover:bg-red-600 cursor-pointer" onClick={resetOrder}>Cancel Order</button>
 
-              <button className="bg-green-500 text-white p-3 rounded-2xl w-full hover:bg-green-600 cursor-pointer">Submit Order</button>
+              <button className="bg-green-500 text-white p-3 rounded-2xl w-full hover:bg-green-600 cursor-pointer" onClick={submitOrder}>Submit Order</button>
             </div>
           </div>
 
