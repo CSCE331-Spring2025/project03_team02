@@ -1,8 +1,14 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
+import { IIngredient, IProduct } from "../utils/interfaces";
+
+import CustomizationModal from "../components/CustomizationModal";
 
 const MenuPage: React.FC = () => {
-  const [products, setProducts] = useState([]);
+  const [products, setProducts] = useState<IProduct[]>([]);
+  const [ingredients, setIngredients] = useState<IIngredient[]>([]);
+
+  const [cart, setCart] = useState<IProduct[]>([]);
 
   const getProducts = async () => {
     const res = (await axios.get(`${import.meta.env.VITE_API_URL}/getproducts`)).data;
@@ -10,24 +16,42 @@ const MenuPage: React.FC = () => {
     setProducts(res.data);
   }
 
-  console.log(products);
+  const getIngredients = async () => {
+    const res = (await axios.get(`${import.meta.env.VITE_API_URL}/getingredients`)).data;
+
+    setIngredients(res.data);
+  }
+
+  const addProductToCart = (product: IProduct) => {
+    setCart([...cart, product])
+  }
 
   useEffect(() => {
     getProducts();
+    getIngredients();
   }, [])
 
   return (
     <div className='w-full h-full p-4'>
+      {products.length > 0 && (
+        <CustomizationModal
+          product={products[0]} // Pass the first product or use a selected one
+          ingredients={ingredients}
+          onSubmit={addProductToCart}
+        />
+      )}
+
       <div className='flex gap-8 h-full'>
         <div className='w-2/3 flex flex-wrap gap-6 border-r-2 border-gray-100'>
           {products.map((product, index) => (
-            <div
+            <button
               key={index}
               className='bg-gray-100 p-4 rounded-xl w-[180px] h-[100px] flex flex-col justify-between shadow-sm hover:bg-gray-200 cursor-pointer'
+              onClick={() => document.getElementById('customization-modal').showModal()}
             >
               <p className='text-base font-bold truncate'>{product.name}</p>
               <p className='text-sm text-gray-700'>${Number(product.price).toFixed(2)}</p>
-            </div>
+            </button>
           ))}
         </div>
 
@@ -39,45 +63,14 @@ const MenuPage: React.FC = () => {
           </div>
 
           <div className="space-y-4">
-            <div className="bg-gray-100 p-4 rounded-xl flex justify-between">
-              <div>
-                <p className="text-xl font-bold">Classic Tea</p>
-                <p className="px-2">$4.00</p>
-              </div>
-
-              <div>
-                <p>Quantity</p>
-                <p className="px-2">1</p>
-              </div>
-            </div>
-
-            <div>
-              <div className="bg-gray-100 p-4 rounded-xl flex justify-between">
+            {cart.map((elm, index) => (
+              <div key={index} className="bg-gray-100 p-4 rounded-xl flex justify-between">
                 <div>
-                  <p className="text-xl font-bold">Classic Tea</p>
-                  <p className="px-2">$4.00</p>
-                </div>
-
-                <div>
-                  <p>Quantity</p>
-                  <p className="px-2">1</p>
+                  <p className="text-xl font-bold">{elm.name}</p>
+                  <p className="px-2">${elm.price}</p>
                 </div>
               </div>
-            </div>
-
-            <div>
-              <div className="bg-gray-100 p-4 rounded-xl flex justify-between">
-                <div>
-                  <p className="text-xl font-bold">Classic Tea</p>
-                  <p className="px-2">$4.00</p>
-                </div>
-
-                <div>
-                  <p>Quantity</p>
-                  <p className="px-2">1</p>
-                </div>
-              </div>
-            </div>
+            ))}
           </div>
 
           <div className="p-4 space-y-4 border border-gray-100">
