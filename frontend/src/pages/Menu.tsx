@@ -1,22 +1,34 @@
-function Menu() {
+import React, { useState, useEffect } from "react";
+import axios from "axios";
+
+const MenuPage: React.FC = () => {
+  const [products, setProducts] = useState([]);
+
+  const getProducts = async () => {
+    const res = (await axios.get(`${import.meta.env.VITE_API_URL}/getproducts`)).data;
+
+    setProducts(res.data);
+  }
+
+  console.log(products);
+
+  useEffect(() => {
+    getProducts();
+  }, [])
+
   return (
     <div className='w-full h-full p-4'>
       <div className='flex gap-8 h-full'>
-        <div className='w-2/3 flex flex-wrap h-full gap-x-6 gap-y-6  border-r-2 border-gray-100'>
-          <div className='bg-gray-100 p-8 rounded-xl h-fit'>
-            <p className='text-lg font-bold'>Classic Tea</p>
-            <p className='text-sm'>$4.00</p>
-          </div>
-
-          <div className='bg-gray-100 p-8 rounded-xl h-fit'>
-            <p className='text-lg font-bold'>Classic Tea</p>
-            <p className='text-sm'>$4.00</p>
-          </div>
-
-          <div className='bg-gray-100 p-8 rounded-xl h-fit'>
-            <p className='text-lg font-bold'>Classic Tea</p>
-            <p className='text-sm'>$4.00</p>
-          </div>
+        <div className='w-2/3 flex flex-wrap gap-6 border-r-2 border-gray-100'>
+          {products.map((product, index) => (
+            <div
+              key={index}
+              className='bg-gray-100 p-4 rounded-xl w-[180px] h-[100px] flex flex-col justify-between shadow-sm'
+            >
+              <p className='text-base font-bold truncate'>{product.name}</p>
+              <p className='text-sm text-gray-700'>${Number(product.price).toFixed(2)}</p>
+            </div>
+          ))}
         </div>
 
         {/* Right: Order Total (1/3) */}
@@ -100,4 +112,4 @@ function Menu() {
   )
 }
 
-export default Menu
+export default MenuPage
