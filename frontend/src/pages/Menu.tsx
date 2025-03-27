@@ -23,7 +23,7 @@ const MenuPage: React.FC = () => {
           {products.map((product, index) => (
             <div
               key={index}
-              className='bg-gray-100 p-4 rounded-xl w-[180px] h-[100px] flex flex-col justify-between shadow-sm'
+              className='bg-gray-100 p-4 rounded-xl w-[180px] h-[100px] flex flex-col justify-between shadow-sm hover:bg-gray-200 cursor-pointer'
             >
               <p className='text-base font-bold truncate'>{product.name}</p>
               <p className='text-sm text-gray-700'>${Number(product.price).toFixed(2)}</p>
@@ -100,9 +100,9 @@ const MenuPage: React.FC = () => {
             </div>
 
             <div className="flex gap-x-8 my-8">
-              <button className="bg-red-500 text-white p-3 rounded-2xl w-full hover:bg-red-600">Cancel Order</button>
+              <button className="bg-red-500 text-white p-3 rounded-2xl w-full hover:bg-red-600 cursor-pointer">Cancel Order</button>
 
-              <button className="bg-green-500 text-white p-3 rounded-2xl w-full hover:bg-green-600">Submit Order</button>
+              <button className="bg-green-500 text-white p-3 rounded-2xl w-full hover:bg-green-600 cursor-pointer">Submit Order</button>
             </div>
           </div>
 
