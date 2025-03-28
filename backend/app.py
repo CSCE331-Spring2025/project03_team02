@@ -1,10 +1,14 @@
 import os
+from dotenv import load_dotenv
 from flask import Flask
 from flask_cors import CORS
 from database import db, Employee
 
 from routes.product_routes import product_routes_bp
 from routes.ingredient_routes import ingredient_routes_bp
+from routes.order_routes import order_routes_bp
+
+load_dotenv()
 
 app = Flask(__name__)
 CORS(app, supports_credentials=True)
@@ -19,7 +23,7 @@ with app.app_context():
     
     app.register_blueprint(product_routes_bp)
     app.register_blueprint(ingredient_routes_bp)
-
+    app.register_blueprint(order_routes_bp)
 
 @app.route('/')
 def home():

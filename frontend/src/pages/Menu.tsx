@@ -44,6 +44,7 @@ const MenuPage: React.FC = () => {
   }
 
   const submitOrder = () => {
+    console.log(ingredients);
     resetOrder()
   }
   const resetOrder = () => {

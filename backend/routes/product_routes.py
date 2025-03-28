@@ -9,8 +9,6 @@ GET products endpoint
 
 This endpoint gets all of the menu items avaliable for sale
 '''
-
-
 @product_routes_bp.route("/getproducts", methods=['GET'])
 def get_products():
     products = []
