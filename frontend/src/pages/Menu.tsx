@@ -5,6 +5,7 @@ import { IIngredient, IProduct } from "../utils/interfaces";
 import CustomizationModal from "../components/CustomizationModal";
 
 const MenuPage: React.FC = () => {
+  const [selectedProduct, setSelectedProduct] = useState<IProduct | null>();
   const [products, setProducts] = useState<IProduct[]>([]);
   const [ingredients, setIngredients] = useState<IIngredient[]>([]);
   const [totals, setTotals] = useState([0, 0, 0]) // subtotal, tax, total
@@ -25,15 +26,15 @@ const MenuPage: React.FC = () => {
 
   const addProductToCart = (product: IProduct) => {
     const newCart = [...cart, product];
-    
+
     setCart(newCart);
     updateTotals(newCart);
   }
 
   const updateTotals = (cart: IProduct[]) => {
     let newSubtotal = 0;
-    
-    for(const product of cart) {
+
+    for (const product of cart) {
       newSubtotal += product.price;
     }
 
@@ -43,9 +44,22 @@ const MenuPage: React.FC = () => {
     setTotals([newSubtotal, taxTotal, newTotal])
   }
 
-  const submitOrder = () => {
-    console.log(ingredients);
+  const submitOrder = async () => {
+    const products = cart.map(elm => elm.id);
+
+    const ingredients = []
+    for (const elm of cart) {
+      ingredients.push(...elm.ingredients.map(ing => ing.id));
+    }
+
+    const employee_id = "550e8400-e29b-41d4-a716-446655440000"
+
+    const total = totals[2]
+
+    await axios.post(`${import.meta.env.VITE_API_URL}/submitorder`, { 'products': products, 'ingredients': ingredients, 'employee_id': employee_id, 'total': total });
+
     resetOrder()
+    alert("Order submitted successfully");
   }
   const resetOrder = () => {
     const newCart: IProduct[] = [];
@@ -59,11 +73,17 @@ const MenuPage: React.FC = () => {
     getIngredients();
   }, [])
 
+  useEffect(() => {
+    if (products.length > 0) {
+      document.getElementById('customization-modal').showModal()
+    }
+  }, [selectedProduct])
+
   return (
     <div className='w-full h-full p-4'>
-      {products.length > 0 && (
+      {products.length > 0 && selectedProduct && (
         <CustomizationModal
-          product={products[0]} // Pass the first product or use a selected one
+          product={selectedProduct} // Pass the first product or use a selected one
           ingredients={ingredients}
           onSubmit={addProductToCart}
         />
@@ -75,7 +95,7 @@ const MenuPage: React.FC = () => {
             <button
               key={index}
               className='bg-gray-100 p-4 rounded-xl w-[180px] h-[100px] flex flex-col justify-between shadow-sm hover:bg-gray-200 cursor-pointer'
-              onClick={() => document.getElementById('customization-modal').showModal()}
+              onClick={() => setSelectedProduct(product)}
             >
               <p className='text-base font-bold truncate'>{product.name}</p>
               <p className='text-sm text-gray-700'>${Number(product.price).toFixed(2)}</p>

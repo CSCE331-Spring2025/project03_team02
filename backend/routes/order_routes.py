@@ -2,7 +2,7 @@ from flask import Blueprint, jsonify, request
 from datetime import datetime
 import uuid
 
-from database import db, Product, OrderTable, ProductOrder, Ingredient
+from database import db, OrderTable, ProductOrder, Ingredient
 
 order_routes_bp = Blueprint('order_routes', __name__)
 
