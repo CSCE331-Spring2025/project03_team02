@@ -44,7 +44,7 @@ const CustomizationModal: React.FC<Props> = ({ product, onSubmit, ingredients })
         setSelectedToppings(ingredients.filter(ing =>
             product?.ingredients?.some(pi => pi.id === ing.id)
         ))
-    }, [product]);
+    }, [ingredients, product]);
 
     return (
         <dialog id="customization-modal" className="modal modal-bottom sm:modal-middle">
@@ -52,12 +52,12 @@ const CustomizationModal: React.FC<Props> = ({ product, onSubmit, ingredients })
                 {/* Header */}
                 <div className="flex justify-between items-start border-b pb-4 mb-4">
                     <div>
-                        <h2 className="text-2xl font-bold">Classic Milk Tea</h2>
+                        <h2 className="text-2xl font-bold">{product.name}</h2>
                         <p className="text-gray-500 text-sm mt-1">
-                            Classic milk tea blended with fragrant tea.
+                            {product.description}
                         </p>
                     </div>
-                    <p className="text-xl font-bold text-gray-800">$4.00</p>
+                    <p className="text-xl font-bold text-gray-800">${product.price}</p>
                 </div>
 
                 {/* Sizes */}

@@ -5,6 +5,8 @@ import { IIngredient, IProduct } from "../utils/interfaces";
 import CustomizationModal from "../components/CustomizationModal";
 
 const MenuPage: React.FC = () => {
+  const [loading, setLoading] = useState(false);
+  
   const [selectedProduct, setSelectedProduct] = useState<IProduct | null>();
   const [products, setProducts] = useState<IProduct[]>([]);
   const [ingredients, setIngredients] = useState<IIngredient[]>([]);
@@ -45,6 +47,10 @@ const MenuPage: React.FC = () => {
   }
 
   const submitOrder = async () => {
+    if(!cart.length) return;
+
+    setLoading(true);
+    
     const products = cart.map(elm => elm.id);
 
     const ingredients = []
@@ -57,7 +63,8 @@ const MenuPage: React.FC = () => {
     const total = totals[2]
 
     await axios.post(`${import.meta.env.VITE_API_URL}/submitorder`, { 'products': products, 'ingredients': ingredients, 'employee_id': employee_id, 'total': total });
-
+    
+    setLoading(false)
     resetOrder()
     alert("Order submitted successfully");
   }
@@ -75,6 +82,7 @@ const MenuPage: React.FC = () => {
 
   useEffect(() => {
     if (products.length > 0) {
+      // @ts-expect-error Expect error from accessing DOM directly
       document.getElementById('customization-modal').showModal()
     }
   }, [selectedProduct])
@@ -91,6 +99,7 @@ const MenuPage: React.FC = () => {
 
       <div className='flex gap-8 h-full'>
         <div className='w-2/3 flex flex-wrap gap-6 border-r-2 border-gray-100'>
+          {!products.length && <span className="loading loading-spinner loading-xl mx-auto"></span>}
           {products.map((product, index) => (
             <button
               key={index}
@@ -143,7 +152,9 @@ const MenuPage: React.FC = () => {
             <div className="flex gap-x-8 my-8">
               <button className="bg-red-500 text-white p-3 rounded-2xl w-full hover:bg-red-600 cursor-pointer" onClick={resetOrder}>Cancel Order</button>
 
-              <button className="bg-green-500 text-white p-3 rounded-2xl w-full hover:bg-green-600 cursor-pointer" onClick={submitOrder}>Submit Order</button>
+              <button className="bg-green-500 text-white p-3 rounded-2xl w-full hover:bg-green-600 cursor-pointer" onClick={submitOrder}>
+                { loading ? <span className="loading loading-spinner loading-md"></span> : <span>Submit Order</span> }
+              </button>
             </div>
           </div>
 
