@@ -40,3 +40,10 @@ export interface IProductOrder {
   product?: IProduct;
   order?: IOrderTable;
 }
+
+
+export interface IItem  {
+  product_name: string;
+  total_quantity_sold: number;
+  total_sales: number;
+}
