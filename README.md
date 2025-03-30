@@ -77,5 +77,5 @@ DATABASE_URL=postgresql://team_02:bulbasaur35@csce-315-db.engr.tamu.edu:5432/tea
 Start the server
 
 ```bash
-  python3 app.py
+  python app.py
 ```
