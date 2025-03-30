@@ -21,7 +21,7 @@ Install dependencies
 
 Create .env file in frontend directory root
 ```
-VITE_API_URL=http://localhost:5000
+VITE_API_URL=http://127.0.0.1:5000
 ```
 
 Start the server
@@ -77,9 +77,5 @@ DATABASE_URL=postgresql://team_02:bulbasaur35@csce-315-db.engr.tamu.edu:5432/tea
 Start the server
 
 ```bash
-  export FLASK_APP=app
-```
-
-```bash
-  flask run
+  python3 app.py
 ```
