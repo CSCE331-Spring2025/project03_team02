@@ -31,7 +31,6 @@ export interface IProduct {
   ingredients: IIngredient[]
 }
 
-
 export interface IProductOrder {
   id: string;
   orderid: string;
@@ -39,11 +38,4 @@ export interface IProductOrder {
   quantity: number;
   product?: IProduct;
   order?: IOrderTable;
-}
-
-
-export interface IItem  {
-  product_name: string;
-  total_quantity_sold: number;
-  total_sales: number;
 }

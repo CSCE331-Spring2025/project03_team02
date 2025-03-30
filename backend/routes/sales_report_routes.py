@@ -5,6 +5,11 @@ from datetime import datetime, timedelta
 
 sales_report_routes_bp = Blueprint('sales_routes', __name__)
 
+'''
+GET sales report endpoint
+
+This endpoint aggregates sales totals for different time intervals
+'''
 @sales_report_routes_bp.route("/getsalesreport", methods=['GET'])
 def get_sales_report():
     sales_data = []
