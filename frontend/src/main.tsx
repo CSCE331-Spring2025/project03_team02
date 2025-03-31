@@ -8,6 +8,7 @@ import Inventory from "./pages/Inventory";
 import Employees from './pages/Employees.tsx'
 import SalesReport from './pages/SalesReport.tsx';
 import ChartPage from './pages/ChartPage'; // Import ChartPage
+import Reports from './pages/Reports.tsx'
 
 createRoot(document.getElementById("root")!).render(
   <BrowserRouter>
@@ -17,7 +18,8 @@ createRoot(document.getElementById("root")!).render(
         <Route path="/inventory" element={<Inventory />} />
         <Route path="/employees" element={<Employees />} />
         <Route path='/salesreport' element={<SalesReport />} />
-        <Route path='/charts' element={<ChartPage />} /> {}
+        <Route path='/charts' element={<ChartPage />} />
+        <Route path='/reports' element={<Reports />} />
       </Route>
     </Routes>
   </BrowserRouter>

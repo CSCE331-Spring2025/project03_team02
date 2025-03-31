@@ -1,5 +1,6 @@
 {
   "compilerOptions": {
+    "incremental": true,
     "tsBuildInfoFile": "./node_modules/.tmp/tsconfig.app.tsbuildinfo",
     "target": "ES2020",
     "useDefineForClassFields": true,
@@ -8,12 +9,15 @@
     "skipLibCheck": true,
 
     /* Bundler mode */
-    "moduleResolution": "bundler",
+    "moduleResolution": "node", // Changed from "bundler" to "node"
     "allowImportingTsExtensions": true,
+    "resolveJsonModule": true, // Added
     "isolatedModules": true,
     "moduleDetection": "force",
     "noEmit": true,
     "jsx": "react-jsx",
+    "esModuleInterop": true, // Added
+    "allowSyntheticDefaultImports": true, // Added
 
     /* Linting */
     "strict": true,
