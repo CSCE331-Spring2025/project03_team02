@@ -7,6 +7,7 @@ from database import db, Employee
 from routes.product_routes import product_routes_bp
 from routes.ingredient_routes import ingredient_routes_bp
 from routes.order_routes import order_routes_bp
+from routes.report_routes import report_routes_bp
 
 load_dotenv()
 
@@ -24,6 +25,7 @@ with app.app_context():
     app.register_blueprint(product_routes_bp)
     app.register_blueprint(ingredient_routes_bp)
     app.register_blueprint(order_routes_bp)
+    app.register_blueprint(report_routes_bp)
 
 @app.route('/')
 def home():

@@ -5,6 +5,8 @@ import { BrowserRouter, Route, Routes } from "react-router";
 
 import Layout from './components/Layout.tsx';
 import Menu from './pages/Menu.tsx'
+import Reports from './pages/Reports.tsx'
+
 
 createRoot(document.getElementById("root")!).render(
   <BrowserRouter>
