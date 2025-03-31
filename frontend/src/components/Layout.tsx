@@ -5,6 +5,15 @@ import Navbar from "./Navbar";
 import SideMenu from "./SideMenu";
 
 const Layout: React.FC = () => {
+    // Get current page based on window location
+    const getCurrentPage = () => {
+        const path = window.location.pathname;
+        if (path.includes('employees')) return 'employees';
+        if (path.includes('inventory')) return 'inventory';
+        if (path.includes('trends')) return 'trends';
+        return 'menu';
+    };
+    
     return (
         <div className="flex flex-col min-h-screen">
             {/* Header */}
@@ -13,7 +22,7 @@ const Layout: React.FC = () => {
             {/* Main content */}
             <main className="flex flex-1 gap-4">
                 <div className="w-1/12 min-w-[100px]">
-                    <SideMenu currentPage="menu" />
+                    <SideMenu currentPage={getCurrentPage()} />
                 </div>
                 <div className="w-11/12 px-4">
                     <Outlet />
