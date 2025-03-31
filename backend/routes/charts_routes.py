@@ -5,17 +5,19 @@ from database import db, OrderTable, ProductOrder, Product, ProductIngredient, I
 
 charts_routes_bp = Blueprint('charts_routes', __name__)
 
+
 def get_date_range(interval):
     """Helper function to determine date range based on interval"""
     now = datetime.utcnow()
 
-    if interval == "daily":
+    if interval == "day":
         start_dt = datetime(now.year, now.month, now.day)
-    elif interval == "weekly":
-        start_dt = now - timedelta(days=now.weekday())
-    elif interval == "monthly":
+    elif interval == "week":
+        monday = now - timedelta(days=now.weekday())
+        start_dt = datetime(monday.year, monday.month, monday.day)
+    elif interval == "month":
         start_dt = datetime(now.year, now.month, 1)
-    elif interval == "yearly":
+    elif interval == "year":
         start_dt = datetime(now.year, 1, 1)
     else:
         raise ValueError("Invalid interval provided")
@@ -26,7 +28,7 @@ def get_date_range(interval):
 @charts_routes_bp.route('/getproductsusedchart', methods=['GET'])
 def get_products_used_chart():
     interval = request.args.get("interval", "daily").lower()
-    
+
     try:
         start_dt, end_dt = get_date_range(interval)
 
@@ -57,14 +59,15 @@ def get_products_used_chart():
 @charts_routes_bp.route('/getingredientsusedchart', methods=['GET'])
 def get_ingredients_used_chart():
     interval = request.args.get("interval", "daily").lower()
-    
+
     try:
         start_dt, end_dt = get_date_range(interval)
 
         query = (
             db.session.query(
                 Ingredient.name.label("label"),
-                func.sum(ProductOrder.quantity * ProductIngredient.quantity).label("value")
+                func.sum(ProductOrder.quantity *
+                         ProductIngredient.quantity).label("value")
             )
             .join(Product, Product.id == ProductOrder.productid)
             .join(ProductIngredient, ProductIngredient.productid == Product.id)
