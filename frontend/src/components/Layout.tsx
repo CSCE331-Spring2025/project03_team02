@@ -1,6 +1,6 @@
 // src/components/Layout.tsx
 import React from "react";
-import { Outlet, useLocation } from "react-router-dom";
+import { Outlet, useLocation } from "react-router";
 
 import Navbar from "./Navbar";
 import SideMenu from "./SideMenu";
@@ -25,11 +25,6 @@ const Layout: React.FC = () => {
                     <Outlet />
                 </div>
             </main>
-
-            {/* Footer */}
-            {/* <footer className="bg-gray-100 text-center p-4">
-                <p className="text-sm text-gray-500">© 2025 Sharetea. All rights reserved.</p>
-            </footer> */}
         </div>
     );
 };

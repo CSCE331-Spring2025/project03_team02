@@ -21,8 +21,8 @@ db.init_app(app)
 with app.app_context():
     db.create_all()
     
-    app.register_blueprint(product_routes_bp, url_prefix='/products')
-    app.register_blueprint(ingredient_routes_bp, url_prefix='/ingredients')
+    app.register_blueprint(product_routes_bp)
+    app.register_blueprint(ingredient_routes_bp)
     app.register_blueprint(order_routes_bp)
 
 @app.route('/')

@@ -15,13 +15,13 @@ const MenuPage: React.FC = () => {
   const [cart, setCart] = useState<IProduct[]>([]);
 
   const getProducts = async () => {
-    const res = (await axios.get(`${import.meta.env.VITE_API_URL}/products/getproducts`)).data;
+    const res = (await axios.get(`${import.meta.env.VITE_API_URL}/getproducts`)).data;
 
     setProducts(res.data);
   }
 
   const getIngredients = async () => {
-    const res = (await axios.get(`${import.meta.env.VITE_API_URL}/ingredients/getingredients`)).data;
+    const res = (await axios.get(`${import.meta.env.VITE_API_URL}/getingredients`)).data;
 
     setIngredients(res.data);
   }
