@@ -3,8 +3,7 @@ from database import db, Employee
 import uuid
 import logging
 
-# Create blueprint with explicit prefix
-employee_routes_bp = Blueprint('employee_routes', __name__, url_prefix='')
+employee_routes_bp = Blueprint('employee_routes', __name__)
 
 '''
 GET employees endpoint

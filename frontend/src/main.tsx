@@ -12,7 +12,7 @@ createRoot(document.getElementById("root")!).render(
     <Routes>
       <Route path='/' element={<Layout />}>
         <Route index element={<Menu />} />
-        <Route path="employees" element={<Employees />} />
+        <Route path="/employees" element={<Employees />} />
       </Route>
     </Routes>
   </BrowserRouter>
