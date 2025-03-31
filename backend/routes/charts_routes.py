@@ -5,75 +5,83 @@ from database import db, OrderTable, ProductOrder, Product, ProductIngredient, I
 
 charts_routes_bp = Blueprint('charts_routes', __name__)
 
-@charts_routes_bp.route('/getproductsusedchart', methods=['GET'])
-def get_products_used_chart():
-    interval = request.args.get("interval")
+def get_date_range(interval):
+    """Helper function to determine date range based on interval"""
     now = datetime.utcnow()
 
-    if interval == "day":
+    if interval == "daily":
         start_dt = datetime(now.year, now.month, now.day)
-        end_dt = now
-    elif interval == "week":
+    elif interval == "weekly":
         start_dt = now - timedelta(days=now.weekday())
-        end_dt = now
-    elif interval == "month":
+    elif interval == "monthly":
         start_dt = datetime(now.year, now.month, 1)
-        end_dt = now
-    elif interval == "year":
+    elif interval == "yearly":
         start_dt = datetime(now.year, 1, 1)
-        end_dt = now
     else:
-        # Default to day view if unspecified
-        start_dt = datetime(now.year, now.month, now.day)
-        end_dt = now
+        raise ValueError("Invalid interval provided")
 
-    query = (
-        db.session.query(
-            Product.name.label("label"),
-            func.sum(ProductOrder.quantity).label("value")
+    return start_dt, now
+
+
+@charts_routes_bp.route('/getproductsusedchart', methods=['GET'])
+def get_products_used_chart():
+    interval = request.args.get("interval", "daily").lower()
+    
+    try:
+        start_dt, end_dt = get_date_range(interval)
+
+        query = (
+            db.session.query(
+                Product.name.label("label"),
+                func.count(ProductOrder.productid).label("value")
+            )
+            .join(Product, Product.id == ProductOrder.productid)
+            .join(OrderTable, OrderTable.id == ProductOrder.orderid)
+            .filter(OrderTable.order_date >= start_dt, OrderTable.order_date <= end_dt)
+            .group_by(Product.name)
+            .order_by(func.count(ProductOrder.productid).desc())
         )
-        .join(Product, Product.id == ProductOrder.productid)
-        .join(OrderTable, OrderTable.id == ProductOrder.orderid)
-        .filter(OrderTable.order_date >= start_dt, OrderTable.order_date <= end_dt)
-        .group_by(Product.name)
-    )
-    results = query.all()
-    data = [{"label": r.label, "value": r.value} for r in results]
-    return jsonify({"data": data})
+
+        results = query.all()
+        data = [{"label": r.label, "value": r.value} for r in results]
+
+        if not data:
+            data = [{"label": "No Data", "value": 0}]
+
+        return jsonify({"data": data})
+
+    except Exception as e:
+        return jsonify({"error": str(e)}), 400
+
 
 @charts_routes_bp.route('/getingredientsusedchart', methods=['GET'])
 def get_ingredients_used_chart():
-    interval = request.args.get("interval")
-    now = datetime.utcnow()
+    interval = request.args.get("interval", "daily").lower()
+    
+    try:
+        start_dt, end_dt = get_date_range(interval)
 
-    if interval == "day":
-        start_dt = datetime(now.year, now.month, now.day)
-        end_dt = now
-    elif interval == "week":
-        start_dt = now - timedelta(days=now.weekday())
-        end_dt = now
-    elif interval == "month":
-        start_dt = datetime(now.year, now.month, 1)
-        end_dt = now
-    elif interval == "year":
-        start_dt = datetime(now.year, 1, 1)
-        end_dt = now
-    else:
-        start_dt = datetime(now.year, now.month, now.day)
-        end_dt = now
-
-    query = (
-        db.session.query(
-            Ingredient.name.label("label"),
-            func.sum(ProductOrder.quantity * ProductIngredient.quantity).label("value")
+        query = (
+            db.session.query(
+                Ingredient.name.label("label"),
+                func.sum(ProductOrder.quantity * ProductIngredient.quantity).label("value")
+            )
+            .join(Product, Product.id == ProductOrder.productid)
+            .join(ProductIngredient, ProductIngredient.productid == Product.id)
+            .join(Ingredient, Ingredient.id == ProductIngredient.ingredientid)
+            .join(OrderTable, OrderTable.id == ProductOrder.orderid)
+            .filter(OrderTable.order_date >= start_dt, OrderTable.order_date <= end_dt)
+            .group_by(Ingredient.name)
+            .order_by(Ingredient.name)
         )
-        .join(Product, Product.id == ProductOrder.productid)
-        .join(ProductIngredient, ProductIngredient.productid == Product.id)
-        .join(Ingredient, Ingredient.id == ProductIngredient.ingredientid)
-        .join(OrderTable, OrderTable.id == ProductOrder.orderid)
-        .filter(OrderTable.order_date >= start_dt, OrderTable.order_date <= end_dt)
-        .group_by(Ingredient.name)
-    )
-    results = query.all()
-    data = [{"label": r.label, "value": r.value} for r in results]
-    return jsonify({"data": data})
+
+        results = query.all()
+        data = [{"label": r.label, "value": r.value} for r in results]
+
+        if not data:
+            data = [{"label": "No Data", "value": 0}]
+
+        return jsonify({"data": data})
+
+    except Exception as e:
+        return jsonify({"error": str(e)}), 400
