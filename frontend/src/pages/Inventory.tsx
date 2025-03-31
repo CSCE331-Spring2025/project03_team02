@@ -4,38 +4,315 @@ import { IIngredient, IProduct } from "../utils/interfaces";
 
 const InventoryPage: React.FC = () => {
   const [loading, setLoading] = useState(false);
-  
-  const [selectedProduct, setSelectedProduct] = useState<IProduct | null>();
+  const [selectedProduct, setSelectedProduct] = useState<IProduct | null>(null);
   const [products, setProducts] = useState<IProduct[]>([]);
   const [ingredients, setIngredients] = useState<IIngredient[]>([]);
+  const [tableType, setTableType] = useState<"Ingredients" | "Products">("Ingredients");
+  const [selectedRow, setSelectedRow] = useState<IIngredient | IProduct | null>(null);
+  const [quantityField, setQuantityField] = useState<string>("0");
+  const [orderQuantityField, setOrderQuantityField] = useState<string>("10");
+  const [isManager, setIsManager] = useState<boolean>(false);
 
   const getProducts = async () => {
-    const res = (await axios.get(`${import.meta.env.VITE_API_URL}/getproducts`)).data;
+    const res = (await axios.get(`${import.meta.env.VITE_API_URL}/products/getproducts`)).data;
 
     setProducts(res.data);
   }
 
   const getIngredients = async () => {
-    const res = (await axios.get(`${import.meta.env.VITE_API_URL}/getingredients`)).data;
+    const res = (await axios.get(`${import.meta.env.VITE_API_URL}/ingredients/getingredients`)).data;
 
     setIngredients(res.data);
   }
+
+  const updateProductPrice = async (productId: string, newPrice: number) => {
+    try {
+      const res = await axios.post(`${import.meta.env.VITE_API_URL}/products/updateproductprice`, { 'id': productId, 'price': newPrice });
+
+      if (res.data.success) {
+        setProducts(products.map(product => 
+          product.id === productId ? { ...product, price: newPrice } : product
+        ));
+        alert("Price updated successfully");
+        return true;
+      } else {
+        alert("Price update failed");
+        return false;
+      }
+    } catch (error) {
+      console.error("Error updating product price:", error);
+      alert("Price update failed");
+      return false;
+    }
+  }
+
+  const updateIngredientStock = async (ingredientId: string, newQuantity: number) => {
+    try {
+      const res = await axios.post(`${import.meta.env.VITE_API_URL}/ingredients/updateingredientstock`, { 'id': ingredientId, 'quantity': newQuantity });
+
+      if (res.data.success) {
+        setIngredients(ingredients.map(ingredient =>
+          ingredient.id === ingredientId ? { ...ingredient, quantity: newQuantity } : ingredient
+        ));
+        alert("Stock updated successfully");
+        return true;
+      } else {
+        alert("Update failed");
+        return false;
+      }
+    } catch (error) {
+      console.error("Error updating ingredient stock:", error);
+      alert("Update failed");
+      return false;
+    }
+  }
+
+  const addNewItem = async (type: "Ingredients" | "Products", itemData: any) => {
+    try {
+      const endpoint = type === "Ingredients" ? `${import.meta.env.VITE_API_URL}/addingredient` : `${import.meta.env.VITE_API_URL}/addproduct`;
+      const res = await axios.post(endpoint, itemData);
+
+      if (res.data.success) {
+        if (type === "Ingredients") {
+          await getIngredients();
+        } else {
+          await getProducts();
+        }
+        alert("Item added successfully");
+        return true;
+      } else {
+        alert("Error when adding item");
+        return false;
+      }
+    } catch (error) {
+      console.error(`Error adding new ${type.toLowerCase()}:`, error);
+      alert("Error when adding item");
+      return false;
+    }
+  }
+
+  const handleUpdateExistingItem = () => {
+    if (!selectedRow) return;
+    
+    if (tableType === "Products") {
+      const product = selectedRow as IProduct;
+      const newPrice = parseFloat(orderQuantityField);
+      if (isNaN(newPrice)) {
+        alert("Please enter a valid price");
+        return;
+      }
+      updateProductPrice(product.id, newPrice);
+    } else {
+      const ingredient = selectedRow as IIngredient;
+      const currentQty = parseInt(quantityField);
+      const orderQty = parseInt(orderQuantityField);
+      if (isNaN(orderQty)) {
+        alert("Please enter a valid quantity");
+        return;
+      }
+      const newQty = currentQty + orderQty;
+      updateIngredientStock(ingredient.id, newQty);
+    }
+  };
+
+  const handleAddNewItem = () => {
+    // TODO collect newItemData with modal
+    // addNewItem(tableType, newItemData); 
+  };
+
+  const handleRowSelect = (item: IIngredient | IProduct) => {
+    setSelectedRow(item);
+    if (tableType === "Products") {
+      const product = item as IProduct;
+      setQuantityField(product.price.toString());
+      setOrderQuantityField("4.00");
+    } else {
+      const ingredient = item as IIngredient;
+      setQuantityField(ingredient.quantity.toString());
+      setOrderQuantityField("10");
+    }
+  };
+
+  const handleTableTypeChange = (newType: "Ingredients" | "Products") => {
+    setTableType(newType);
+    setSelectedRow(null);
+    if (newType === "Products") {
+      setQuantityField("0.00");
+      setOrderQuantityField("4.00");
+    } else {
+      setQuantityField("0");
+      setOrderQuantityField("10");
+    }
+  };
 
   useEffect(() => {
     getProducts();
     getIngredients();
   }, [])
 
-  useEffect(() => {
-    if (products.length > 0) {
-      // @ts-expect-error Expect error from accessing DOM directly
-      document.getElementById('customization-modal').showModal()
-    }
-  }, [selectedProduct])
-
   return (
-    <div className='w-full h-full p-4'>
-   
+    <div className="flex flex-col h-screen">
+      <div className="flex flex-1 overflow-hidden">
+        {/* Main Content Area - Scrollable */}
+        <div className="flex-1 overflow-y-auto">
+          <div className="p-5 space-y-8">
+            {/* Inventory Content Section */}
+            <div className="bg-white p-5 rounded shadow">
+              <div className="flex items-center mb-4">
+                <label className="mr-2">Select Table:</label>
+                <select 
+                  className="border p-1 rounded"
+                  value={tableType}
+                  onChange={(e) => handleTableTypeChange(e.target.value as "Ingredients" | "Products")}
+                >
+                  <option value="Ingredients">Ingredients</option>
+                  <option value="Products">Products</option>
+                </select>
+              </div>
+
+              <div className="flex">
+                {/* Entry Form */}
+                <div className="w-64 mr-4 p-4 border rounded">
+                  <p className="mb-2">ID: {selectedRow?.id || ''}</p>
+                  <div className="mb-4">
+                    <label className="block mb-1">{tableType === "Products" ? "Current Price:" : "Current Stock:"}</label>
+                    <input 
+                      type="text" 
+                      className="border p-2 w-full rounded bg-gray-100"
+                      value={quantityField}
+                      readOnly
+                    />
+                  </div>
+                  <div className="mb-4">
+                    <label className="block mb-1">{tableType === "Products" ? "New Price:" : "Order Quantity:"}</label>
+                    <input 
+                      type="text" 
+                      className="border p-2 w-full rounded"
+                      value={orderQuantityField}
+                      onChange={(e) => setOrderQuantityField(e.target.value)}
+                    />
+                  </div>
+                  <button 
+                    className="bg-blue-500 text-white p-2 rounded w-full mb-2"
+                    onClick={handleUpdateExistingItem}
+                  >
+                    {tableType === "Products" ? "Update Price" : "Order More"}
+                  </button>
+                  <button 
+                    className="bg-green-500 text-white p-2 rounded w-full"
+                    onClick={handleAddNewItem}
+                  >
+                    Add New Item
+                  </button>
+                </div>
+
+                {/* Inventory Table */}
+                <div className="flex-1">
+                  {loading ? (
+                    <div className="flex justify-center items-center h-64">
+                      <p>Loading...</p>
+                    </div>
+                  ) : (
+                    <div className="overflow-x-auto">
+                      <table className="min-w-full bg-white border">
+                        <thead>
+                          <tr className="bg-gray-100">
+                            <th className="py-2 px-4 border">ID</th>
+                            <th className="py-2 px-4 border">{tableType === "Products" ? "Name" : "Ingredient"}</th>
+                            {tableType === "Products" ? (
+                              <>
+                                <th className="py-2 px-4 border">Description</th>
+                                <th className="py-2 px-4 border">Price</th>
+                                <th className="py-2 px-4 border">Customizations</th>
+                                <th className="py-2 px-4 border">Boba</th>
+                              </>
+                            ) : (
+                              <>
+                                <th className="py-2 px-4 border">Stock</th>
+                                <th className="py-2 px-4 border">Source</th>
+                                <th className="py-2 px-4 border">Expiration</th>
+                              </>
+                            )}
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {tableType === "Products" ? (
+                            products.map((product) => (
+                              <tr 
+                                key={product.id} 
+                                className={`hover:bg-gray-50 cursor-pointer ${selectedRow?.id === product.id ? 'bg-blue-100' : ''}`}
+                                onClick={() => handleRowSelect(product)}
+                              >
+                                <td className="py-3 px-4 border">{product.id}</td>
+                                <td className="py-3 px-4 border">{product.name}</td>
+                                <td className="py-3 px-4 border">{product.description}</td>
+                                <td className="py-3 px-4 border">${product.price.toFixed(2)}</td>
+                                <td className="py-3 px-4 border">{product.customizations}</td>
+                                <td className="py-3 px-4 border">{product.has_boba ? "Yes" : "No"}</td>
+                              </tr>
+                            ))
+                          ) : (
+                            ingredients.map((ingredient) => (
+                              <tr 
+                                key={ingredient.id} 
+                                className={`hover:bg-gray-50 cursor-pointer ${selectedRow?.id === ingredient.id ? 'bg-blue-100' : ''}`}
+                                onClick={() => handleRowSelect(ingredient)}
+                              >
+                                <td className="py-3 px-4 border">{ingredient.id}</td>
+                                <td className="py-3 px-4 border">{ingredient.name}</td>
+                                <td className="py-3 px-4 border">{ingredient.quantity}</td>
+                                <td className="py-3 px-4 border">{ingredient.supplier}</td>
+                                <td className="py-3 px-4 border">{ingredient.expiration}</td>
+                              </tr>
+                            ))
+                          )}
+                        </tbody>
+                      </table>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+
+            {/* Restock Report Section */}
+            <div className="bg-white p-5 rounded shadow">
+              <h2 className="text-lg font-semibold mb-4">Restock Report:</h2>
+              {loading ? (
+                <div className="flex justify-center items-center h-32">
+                  <p>Loading...</p>
+                </div>
+              ) : (
+                <div className="overflow-x-auto">
+                  <table className="min-w-full bg-white border">
+                    <thead>
+                      <tr className="bg-gray-100">
+                        <th className="py-2 px-4 border">ID</th>
+                        <th className="py-2 px-4 border">Ingredient</th>
+                        <th className="py-2 px-4 border">Stock</th>
+                        <th className="py-2 px-4 border">Source</th>
+                        <th className="py-2 px-4 border">Expiration</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {ingredients
+                        .filter(ingredient => ingredient.quantity <= 100)
+                        .map((ingredient) => (
+                          <tr key={ingredient.id} className="hover:bg-gray-50">
+                            <td className="py-3 px-4 border">{ingredient.id}</td>
+                            <td className="py-3 px-4 border">{ingredient.name}</td>
+                            <td className="py-3 px-4 border">{ingredient.quantity}</td>
+                            <td className="py-3 px-4 border">{ingredient.supplier}</td>
+                            <td className="py-3 px-4 border">{ingredient.expiration}</td>
+                          </tr>
+                        ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   )
 }
