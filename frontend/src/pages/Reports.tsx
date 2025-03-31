@@ -53,7 +53,6 @@ const Reports = () => {
       console.error("Error fetching X-Report:", error);
       setLoading(false);
       
-      // Fallback to empty data if API fails
       setXReportData({
         totalOrders: 0,
         subtotal: 0,
@@ -78,7 +77,7 @@ const Reports = () => {
       if (response.data && response.data.data) {
         setZReportData(response.data.data);
         
-        // Clear X-Report data since Z-Report was generated
+
         setXReportData({
           totalOrders: 0,
           subtotal: 0,
@@ -107,7 +106,7 @@ const Reports = () => {
     setShowZConfirmModal(false);
   };
 
-  // Function to format currency consistently
+
   const formatCurrency = (value: number) => {
     return `$${value.toFixed(2)}`;
   };

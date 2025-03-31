@@ -120,20 +120,20 @@ def generate_z_report():
 
         today = datetime.now().date()
         
-        # First, get the current X-Report data to use for the Z-Report
+
         orders_query = Order.query.filter(func.date(Order.order_date) == today)
         total_orders = orders_query.count()
         
-        # Calculate sales totals
+
         sales_data = db.session.query(
             func.sum(Order.total).label('subtotal')
         ).filter(func.date(Order.order_date) == today).first()
         
         subtotal = float(sales_data.subtotal or 0)
-        tax_total = subtotal * 0.0825  # Using 8.25% tax rate
+        tax_total = subtotal * 0.0825  
         total_sales = subtotal + tax_total
         
-        # Get ingredients used today
+
         ingredients_used = []
         ingredient_data = db.session.query(
             Ingredient.id,
@@ -159,7 +159,7 @@ def generate_z_report():
                 "count": ingredient.count
             })
         
-        # Get sales per employee
+
         sales_per_employee = []
         employee_data = db.session.query(
             Employee.id,
@@ -181,7 +181,7 @@ def generate_z_report():
                 "sales": float(employee.sales or 0)
             })
         
-        # Compile the Z-Report data
+
         z_report_data = {
             "totalOrders": total_orders,
             "subtotal": subtotal,
@@ -193,8 +193,6 @@ def generate_z_report():
             "generatedAt": datetime.now().isoformat()
         }
         
-        # In a real system, you would store the Z-Report in a database
-        # and potentially reset daily counters or mark orders as "processed"
         
         return jsonify({"data": z_report_data})
         
