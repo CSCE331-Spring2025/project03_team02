@@ -4,17 +4,24 @@ import axios from "axios";
 const Reports = () => {
   const [loading, setLoading] = useState(false);
   const [showZConfirmModal, setShowZConfirmModal] = useState(false);
+  const [timeRange, setTimeRange] = useState("daily");
   
   interface ReportData {
     totalOrders: number;
     subtotal: number;
     totalTax: number;
     totalSales: number;
+    timeRange: string;
+    periodName: string;
+    timeUnitName: string;
+    startDate: string;
+    endDate: string;
     hourlySales: Array<{ hour: string; total: number }>;
     productSales: Array<{ name: string; quantity: number; total: number }>;
     employeePerformance: Array<{ name: string; orders: number; sales: number }>;
     ingredientsUsed?: Array<{ name: string; count: number }>;
     salesPerEmployee?: Array<{ name: string; orders: number; sales: number }>;
+    periodText?: string;
     reportDate?: string;
     generatedAt?: string;
   }
@@ -24,6 +31,11 @@ const Reports = () => {
     subtotal: 0,
     totalTax: 0,
     totalSales: 0,
+    timeRange: "daily",
+    periodName: "Daily",
+    timeUnitName: "Hourly",
+    startDate: new Date().toISOString().split('T')[0],
+    endDate: new Date().toISOString().split('T')[0],
     hourlySales: [],
     productSales: [],
     employeePerformance: []
@@ -35,12 +47,12 @@ const Reports = () => {
 
   useEffect(() => {
     fetchXReport();
-  }, []);
+  }, [timeRange]);
 
   const fetchXReport = async () => {
     setLoading(true);
     try {
-      const response = await axios.get(`${import.meta.env.VITE_API_URL}/getxreport`);
+      const response = await axios.get(`${import.meta.env.VITE_API_URL}/getxreport?timeRange=${timeRange}`);
       
       if (response.data && response.data.data) {
         setXReportData(response.data.data);
@@ -53,11 +65,17 @@ const Reports = () => {
       console.error("Error fetching X-Report:", error);
       setLoading(false);
       
+      // Reset to default values on error
       setXReportData({
         totalOrders: 0,
         subtotal: 0,
         totalTax: 0,
         totalSales: 0,
+        timeRange: "daily",
+        periodName: "Daily",
+        timeUnitName: "Hourly",
+        startDate: new Date().toISOString().split('T')[0],
+        endDate: new Date().toISOString().split('T')[0],
         hourlySales: [],
         productSales: [],
         employeePerformance: []
@@ -72,17 +90,23 @@ const Reports = () => {
   const generateZReport = async () => {
     setLoading(true);
     try {
-      const response = await axios.post(`${import.meta.env.VITE_API_URL}/generatezreport`);
+      const response = await axios.post(`${import.meta.env.VITE_API_URL}/generatezreport`, { 
+        timeRange: timeRange 
+      });
       
       if (response.data && response.data.data) {
         setZReportData(response.data.data);
         
-
         setXReportData({
           totalOrders: 0,
           subtotal: 0,
           totalTax: 0,
           totalSales: 0,
+          timeRange: timeRange,
+          periodName: xReportData.periodName,
+          timeUnitName: xReportData.timeUnitName,
+          startDate: xReportData.startDate,
+          endDate: xReportData.endDate,
           hourlySales: [],
           productSales: [],
           employeePerformance: []
@@ -106,32 +130,45 @@ const Reports = () => {
     setShowZConfirmModal(false);
   };
 
+  const handleTimeRangeChange = (e) => {
+    setTimeRange(e.target.value.toLowerCase());
+  };
 
   const formatCurrency = (value: number) => {
     return `$${value.toFixed(2)}`;
+  };
+
+  // Function to format date ranges for display
+  const formatDateRange = () => {
+    try {
+      const startDate = new Date(xReportData.startDate);
+      const endDate = new Date(xReportData.endDate);
+      
+      if (timeRange === "daily") {
+        return startDate.toLocaleDateString(undefined, { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+      } else {
+        return `${startDate.toLocaleDateString()} - ${endDate.toLocaleDateString()}`;
+      }
+    } catch (error) {
+      return new Date().toLocaleDateString();
+    }
   };
 
   return (
     <div className="w-full min-h-screen p-6 bg-gray-50 dark:bg-gray-900 text-gray-800 dark:text-gray-100">
       <div className="mb-8 flex justify-between items-center">
         <h1 className="text-3xl font-bold">Reports</h1>
-        <div className="flex items-center gap-4">
-          <div className="flex items-center">
-            <span className="mr-2 font-medium">Chart Type:</span>
-            <select className="bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 text-gray-800 dark:text-gray-200 rounded-lg p-2 focus:ring-blue-500 focus:border-blue-500 focus:ring-2 outline-none">
-              <option>Product</option>
-              <option>Employee</option>
-              <option>Time</option>
-            </select>
-          </div>
-          <div className="flex items-center">
-            <span className="mr-2 font-medium">Time Range:</span>
-            <select className="bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 text-gray-800 dark:text-gray-200 rounded-lg p-2 focus:ring-blue-500 focus:border-blue-500 focus:ring-2 outline-none">
-              <option>Daily</option>
-              <option>Weekly</option>
-              <option>Monthly</option>
-            </select>
-          </div>
+        <div className="flex items-center">
+          <span className="mr-2 font-medium">Time Range:</span>
+          <select 
+            className="bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 text-gray-800 dark:text-gray-200 rounded-lg p-2 focus:ring-blue-500 focus:border-blue-500 focus:ring-2 outline-none"
+            onChange={handleTimeRangeChange}
+            value={timeRange.charAt(0).toUpperCase() + timeRange.slice(1)}
+          >
+            <option value="Daily">Daily</option>
+            <option value="Weekly">Weekly</option>
+            <option value="Monthly">Monthly</option>
+          </select>
         </div>
       </div>
 
@@ -139,9 +176,9 @@ const Reports = () => {
         {/* X-Report Column */}
         <div className="space-y-6">
           <div className="flex justify-between items-center">
-            <h2 className="text-2xl font-bold mb-4">X-Report</h2>
+            <h2 className="text-2xl font-bold mb-4">X-Report ({xReportData.periodName})</h2>
             <span className="text-sm text-gray-500 dark:text-gray-400">
-              {new Date().toLocaleDateString()}
+              {formatDateRange()}
             </span>
           </div>
           
@@ -154,7 +191,7 @@ const Reports = () => {
               {/* Daily Sales Summary */}
               <div className="bg-white dark:bg-gray-800 rounded-xl overflow-hidden shadow-sm transition-all hover:shadow-md">
                 <div className="bg-blue-100 dark:bg-blue-900 p-4 font-bold text-lg">
-                  Daily Sales Summary
+                  {xReportData.periodName} Sales Summary
                 </div>
                 <div className="p-4">
                   <div className="grid grid-cols-2 gap-y-3">
@@ -170,16 +207,18 @@ const Reports = () => {
                 </div>
               </div>
 
-              {/* Hourly Sales */}
+              {/* Time-based Sales */}
               <div className="bg-white dark:bg-gray-800 rounded-xl overflow-hidden shadow-sm transition-all hover:shadow-md">
                 <div className="bg-blue-100 dark:bg-blue-900 p-4 font-bold text-lg">
-                  Hourly Sales
+                  {xReportData.timeUnitName} Sales
                 </div>
                 <div className="overflow-hidden">
                   <table className="w-full">
                     <thead>
                       <tr className="bg-gray-50 dark:bg-gray-700">
-                        <th className="p-4 text-left font-semibold">Hour</th>
+                        <th className="p-4 text-left font-semibold">
+                          {timeRange === "daily" ? "Hour" : timeRange === "weekly" ? "Day" : "Week"}
+                        </th>
                         <th className="p-4 text-right font-semibold">Total</th>
                       </tr>
                     </thead>
@@ -193,7 +232,9 @@ const Reports = () => {
                         ))
                       ) : (
                         <tr className="border-t border-gray-200 dark:border-gray-700">
-                          <td colSpan={2} className="p-6 text-center italic text-gray-500 dark:text-gray-400">No hourly sales data available</td>
+                          <td colSpan={2} className="p-6 text-center italic text-gray-500 dark:text-gray-400">
+                            No {xReportData.timeUnitName.toLowerCase()} sales data available
+                          </td>
                         </tr>
                       )}
                       <tr className="bg-gray-100 dark:bg-gray-700 font-bold">
@@ -287,7 +328,9 @@ const Reports = () => {
         {/* Z-Report Column */}
         <div>
           <div className="flex justify-between items-center mb-4">
-            <h2 className="text-2xl font-bold">Z-Report</h2>
+            <h2 className="text-2xl font-bold">
+              Z-Report {zReportData ? `(${zReportData.periodName})` : `(${xReportData.periodName})`}
+            </h2>
             <button 
               onClick={showZReportConfirmation}
               className="bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700 text-white px-5 py-2.5 rounded-lg font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-blue-300 dark:focus:ring-blue-800"
@@ -314,10 +357,10 @@ const Reports = () => {
             </div>
           ) : (
             <div className="space-y-6">
-              {/* Z-Report Daily Sales Summary */}
+              {/* Z-Report Sales Summary */}
               <div className="bg-white dark:bg-gray-800 rounded-xl overflow-hidden shadow-sm transition-all hover:shadow-md">
                 <div className="bg-green-100 dark:bg-green-900 p-4 font-bold text-lg">
-                  Z-Report: Daily Sales Summary
+                  Z-Report: {zReportData?.periodName || ""} Sales Summary
                 </div>
                 <div className="p-4">
                   <div className="grid grid-cols-2 gap-y-3">
@@ -333,10 +376,10 @@ const Reports = () => {
                 </div>
               </div>
 
-              {/* Ingredients Used Today */}
+              {/* Ingredients Used */}
               <div className="bg-white dark:bg-gray-800 rounded-xl overflow-hidden shadow-sm transition-all hover:shadow-md">
                 <div className="bg-green-100 dark:bg-green-900 p-4 font-bold text-lg">
-                  Ingredients Used Today
+                  Ingredients Used {zReportData?.periodText || ""}
                 </div>
                 <div className="overflow-hidden">
                   {zReportData?.ingredientsUsed && zReportData.ingredientsUsed.length > 0 ? (
@@ -416,7 +459,8 @@ const Reports = () => {
             <div className="mb-6 p-4 bg-yellow-50 dark:bg-yellow-900/30 border-l-4 border-yellow-500 dark:border-yellow-600 text-yellow-800 dark:text-yellow-200">
               <p className="font-medium mb-1">Warning</p>
               <p className="text-sm">
-                The Z-Report should only be run once per day, typically at the end of business. 
+                The Z-Report should only be run once per {timeRange === "daily" ? "day" : timeRange === "weekly" ? "week" : "month"}, 
+                typically at the end of business. 
                 Generating a Z-Report will clear all current X-Report data.
               </p>
             </div>
