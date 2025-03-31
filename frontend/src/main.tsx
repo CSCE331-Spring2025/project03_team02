@@ -4,7 +4,6 @@ import { createRoot } from 'react-dom/client';
 import { BrowserRouter, Route, Routes } from "react-router";
 import Layout from './components/Layout.tsx';
 import Menu from './pages/Menu.tsx';
-import Menu from './pages/Menu.tsx'
 import Inventory from "./pages/Inventory";
 import Employees from './pages/Employees.tsx'
 import SalesReport from './pages/SalesReport.tsx';
