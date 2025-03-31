@@ -47,7 +47,7 @@ const Reports = () => {
 
   useEffect(() => {
     fetchXReport();
-  }, [timeRange]);
+  }, [timeRange]); // Refetch when time range changes
 
   const fetchXReport = async () => {
     setLoading(true);
@@ -97,6 +97,7 @@ const Reports = () => {
       if (response.data && response.data.data) {
         setZReportData(response.data.data);
         
+        // Clear X-Report data when Z-Report is generated
         setXReportData({
           totalOrders: 0,
           subtotal: 0,
@@ -184,12 +185,12 @@ const Reports = () => {
           
           {loading && !zReportGenerated ? (
             <div className="flex justify-center items-center h-64 bg-white dark:bg-gray-800 rounded-xl shadow-sm">
-              <div className="w-12 h-12 border-4 border-blue-500 dark:border-blue-400 border-t-transparent dark:border-t-transparent rounded-full animate-spin"></div>
+              <p>Loading...</p>
             </div>
           ) : (
             <div className="space-y-6">
               {/* Daily Sales Summary */}
-              <div className="bg-white dark:bg-gray-800 rounded-xl overflow-hidden shadow-sm transition-all hover:shadow-md">
+              <div className="bg-white dark:bg-gray-800 rounded-xl overflow-hidden shadow-sm">
                 <div className="bg-blue-100 dark:bg-blue-900 p-4 font-bold text-lg">
                   {xReportData.periodName} Sales Summary
                 </div>
@@ -208,7 +209,7 @@ const Reports = () => {
               </div>
 
               {/* Time-based Sales */}
-              <div className="bg-white dark:bg-gray-800 rounded-xl overflow-hidden shadow-sm transition-all hover:shadow-md">
+              <div className="bg-white dark:bg-gray-800 rounded-xl overflow-hidden shadow-sm">
                 <div className="bg-blue-100 dark:bg-blue-900 p-4 font-bold text-lg">
                   {xReportData.timeUnitName} Sales
                 </div>
@@ -247,7 +248,7 @@ const Reports = () => {
               </div>
 
               {/* Product Sales */}
-              <div className="bg-white dark:bg-gray-800 rounded-xl overflow-hidden shadow-sm transition-all hover:shadow-md">
+              <div className="bg-white dark:bg-gray-800 rounded-xl overflow-hidden shadow-sm">
                 <div className="bg-blue-100 dark:bg-blue-900 p-4 font-bold text-lg">
                   Product Sales
                 </div>
@@ -285,7 +286,7 @@ const Reports = () => {
               </div>
 
               {/* Employee Performance */}
-              <div className="bg-white dark:bg-gray-800 rounded-xl overflow-hidden shadow-sm transition-all hover:shadow-md">
+              <div className="bg-white dark:bg-gray-800 rounded-xl overflow-hidden shadow-sm">
                 <div className="bg-blue-100 dark:bg-blue-900 p-4 font-bold text-lg">
                   Employee Performance
                 </div>
@@ -333,7 +334,7 @@ const Reports = () => {
             </h2>
             <button 
               onClick={showZReportConfirmation}
-              className="bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700 text-white px-5 py-2.5 rounded-lg font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-blue-300 dark:focus:ring-blue-800"
+              className="bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700 text-white px-5 py-2.5 rounded-lg font-medium focus:outline-none focus:ring-2 focus:ring-blue-300 dark:focus:ring-blue-800"
               disabled={loading}
             >
               Generate Z-Report
@@ -353,12 +354,12 @@ const Reports = () => {
             </div>
           ) : loading ? (
             <div className="flex justify-center items-center h-64 bg-white dark:bg-gray-800 rounded-xl shadow-sm">
-              <div className="w-12 h-12 border-4 border-blue-500 dark:border-blue-400 border-t-transparent dark:border-t-transparent rounded-full animate-spin"></div>
+              <p>Loading...</p>
             </div>
           ) : (
             <div className="space-y-6">
               {/* Z-Report Sales Summary */}
-              <div className="bg-white dark:bg-gray-800 rounded-xl overflow-hidden shadow-sm transition-all hover:shadow-md">
+              <div className="bg-white dark:bg-gray-800 rounded-xl overflow-hidden shadow-sm">
                 <div className="bg-green-100 dark:bg-green-900 p-4 font-bold text-lg">
                   Z-Report: {zReportData?.periodName || ""} Sales Summary
                 </div>
@@ -377,7 +378,7 @@ const Reports = () => {
               </div>
 
               {/* Ingredients Used */}
-              <div className="bg-white dark:bg-gray-800 rounded-xl overflow-hidden shadow-sm transition-all hover:shadow-md">
+              <div className="bg-white dark:bg-gray-800 rounded-xl overflow-hidden shadow-sm">
                 <div className="bg-green-100 dark:bg-green-900 p-4 font-bold text-lg">
                   Ingredients Used {zReportData?.periodText || ""}
                 </div>
@@ -408,7 +409,7 @@ const Reports = () => {
               </div>
 
               {/* Sales Per Employee */}
-              <div className="bg-white dark:bg-gray-800 rounded-xl overflow-hidden shadow-sm transition-all hover:shadow-md">
+              <div className="bg-white dark:bg-gray-800 rounded-xl overflow-hidden shadow-sm">
                 <div className="bg-green-100 dark:bg-green-900 p-4 font-bold text-lg">
                   Sales Per Employee
                 </div>
@@ -453,7 +454,7 @@ const Reports = () => {
 
       {/* Z-Report Confirmation Modal */}
       {showZConfirmModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 backdrop-blur-sm flex items-center justify-center z-50">
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white dark:bg-gray-800 rounded-xl p-6 max-w-md w-full shadow-lg">
             <h3 className="text-xl font-bold mb-4 text-gray-900 dark:text-white">Generate Z-Report</h3>
             <div className="mb-6 p-4 bg-yellow-50 dark:bg-yellow-900/30 border-l-4 border-yellow-500 dark:border-yellow-600 text-yellow-800 dark:text-yellow-200">
@@ -470,13 +471,13 @@ const Reports = () => {
             <div className="flex justify-end gap-4">
               <button 
                 onClick={cancelZReport}
-                className="px-4 py-2 rounded-lg bg-gray-200 hover:bg-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-800 dark:text-gray-200 font-medium transition-colors"
+                className="px-4 py-2 rounded-lg bg-gray-200 hover:bg-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-800 dark:text-gray-200 font-medium"
               >
                 Cancel
               </button>
               <button 
                 onClick={generateZReport}
-                className="px-4 py-2 rounded-lg bg-red-500 hover:bg-red-600 dark:bg-red-600 dark:hover:bg-red-700 text-white font-medium transition-colors"
+                className="px-4 py-2 rounded-lg bg-red-500 hover:bg-red-600 dark:bg-red-600 dark:hover:bg-red-700 text-white font-medium"
               >
                 Confirm
               </button>
