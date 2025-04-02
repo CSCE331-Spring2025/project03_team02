@@ -1,88 +1,91 @@
+// Reports.tsx
 import React, { useState, useEffect } from "react";
 import axios from "axios";
+import XReport, { ReportData } from "../components/XReport";
+import ZReport from "../components/ZReport";
+import ChartPage from "./ChartPage";
 
-const Reports = () => {
+const Reports: React.FC = () => {
+  // Combined States
   const [loading, setLoading] = useState(false);
-  const [showZConfirmModal, setShowZConfirmModal] = useState(false);
-  const [timeRange, setTimeRange] = useState("daily");
-  
-  interface ReportData {
-    totalOrders: number;
-    subtotal: number;
-    totalTax: number;
-    totalSales: number;
-    timeRange: string;
-    periodName: string;
-    timeUnitName: string;
-    startDate: string;
-    endDate: string;
-    hourlySales: Array<{ hour: string; total: number }>;
-    productSales: Array<{ name: string; quantity: number; total: number }>;
-    employeePerformance: Array<{ name: string; orders: number; sales: number }>;
-    ingredientsUsed?: Array<{ name: string; count: number }>;
-    salesPerEmployee?: Array<{ name: string; orders: number; sales: number }>;
-    periodText?: string;
-    reportDate?: string;
-    generatedAt?: string;
-  }
-  
-  const [xReportData, setXReportData] = useState<ReportData>({
-    totalOrders: 0,
-    subtotal: 0,
-    totalTax: 0,
-    totalSales: 0,
-    timeRange: "daily",
-    periodName: "Daily",
-    timeUnitName: "Hourly",
-    startDate: new Date().toISOString().split('T')[0],
-    endDate: new Date().toISOString().split('T')[0],
-    hourlySales: [],
-    productSales: [],
-    employeePerformance: []
-  });
-
+  const [xReportData, setXReportData] = useState<ReportData | null>(null);
   const [zReportData, setZReportData] = useState<ReportData | null>(null);
-  
   const [zReportGenerated, setZReportGenerated] = useState(false);
+  const [showZConfirmModal, setShowZConfirmModal] = useState(false);
+  const [selectedInterval, setSelectedInterval] = useState<string>("today");
+  const [startDate, setStartDate] = useState<string>(new Date().toISOString().split("T")[0]);
+  const [endDate, setEndDate] = useState<string>(new Date().toISOString().split("T")[0]);
+  const [startTime, setStartTime] = useState<string>("00:00:00");
+  const [endTime, setEndTime] = useState<string>("23:59:59");
 
-  useEffect(() => {
-    fetchXReport();
-  }, [timeRange]); // Refetch when time range changes
+  // Utility functions
+  const formatCurrency = (value: number) => `$${value.toFixed(2)}`;
 
-  const fetchXReport = async () => {
+  const formatDateRange = () => {
+    try {
+      if (!xReportData) return "";
+      const sDate = new Date(xReportData.startDate);
+      const eDate = new Date(xReportData.endDate);
+      if (selectedInterval === "today" || selectedInterval === "pastHour") {
+        return sDate.toLocaleDateString(undefined, {
+          weekday: "long",
+          year: "numeric",
+          month: "long",
+          day: "numeric",
+        });
+      }
+      return `${sDate.toLocaleDateString()} - ${eDate.toLocaleDateString()}`;
+    } catch {
+      return new Date().toLocaleDateString();
+    }
+  };
+
+  const mapIntervalToTimeRange = (interval: string) => {
+    switch (interval) {
+      case "pastHour":
+      case "today":
+        return "daily";
+      case "thisWeek":
+        return "weekly";
+      case "thisMonth":
+        return "monthly";
+      case "thisYear":
+        return "yearly";
+      default:
+        return "daily";
+    }
+  };
+
+  // Fetch X-Report data
+  const fetchXReport = async (interval: string) => {
     setLoading(true);
     try {
-      const response = await axios.get(`${import.meta.env.VITE_API_URL}/getxreport?timeRange=${timeRange}`);
-      
+      const params: { startDate?: string; endDate?: string; timeRange?: string } = {};
+      if (interval === "custom") {
+        params.startDate = `${startDate} ${startTime}`;
+        params.endDate = `${endDate} ${endTime}`;
+      } else {
+        params.timeRange = mapIntervalToTimeRange(interval);
+      }
+      const response = await axios.get(
+        `${import.meta.env.VITE_API_URL}/getxreport`,
+        { params }
+      );
       if (response.data && response.data.data) {
         setXReportData(response.data.data);
       } else {
         console.error("Invalid response format from X-Report API");
+        setXReportData(null);
       }
-      
-      setLoading(false);
     } catch (error) {
       console.error("Error fetching X-Report:", error);
+      setXReportData(null);
+    } finally {
       setLoading(false);
-      
-      // Reset to default values on error
-      setXReportData({
-        totalOrders: 0,
-        subtotal: 0,
-        totalTax: 0,
-        totalSales: 0,
-        timeRange: "daily",
-        periodName: "Daily",
-        timeUnitName: "Hourly",
-        startDate: new Date().toISOString().split('T')[0],
-        endDate: new Date().toISOString().split('T')[0],
-        hourlySales: [],
-        productSales: [],
-        employeePerformance: []
-      });
     }
   };
 
+  // Z-Report generation
   const showZReportConfirmation = () => {
     setShowZConfirmModal(true);
   };
@@ -90,392 +93,228 @@ const Reports = () => {
   const generateZReport = async () => {
     setLoading(true);
     try {
-      const response = await axios.post(`${import.meta.env.VITE_API_URL}/generatezreport`, { 
-        timeRange: timeRange 
-      });
-      
+      const timeRangeParam = mapIntervalToTimeRange(selectedInterval);
+      const response = await axios.post(
+        `${import.meta.env.VITE_API_URL}/generatezreport`,
+        { timeRange: timeRangeParam }
+      );
       if (response.data && response.data.data) {
         setZReportData(response.data.data);
-        
-        // Clear X-Report data when Z-Report is generated
+        setZReportGenerated(true);
+        // Clear the X-Report data after generating Z-Report
         setXReportData({
           totalOrders: 0,
           subtotal: 0,
           totalTax: 0,
           totalSales: 0,
-          timeRange: timeRange,
-          periodName: xReportData.periodName,
-          timeUnitName: xReportData.timeUnitName,
-          startDate: xReportData.startDate,
-          endDate: xReportData.endDate,
+          timeRange: timeRangeParam,
+          periodName: "",
+          timeUnitName: "",
+          startDate: "",
+          endDate: "",
           hourlySales: [],
           productSales: [],
-          employeePerformance: []
+          employeePerformance: [],
         });
-        
-        setZReportGenerated(true);
       } else {
         console.error("Invalid response format from Z-Report API");
       }
-      
       setShowZConfirmModal(false);
-      setLoading(false);
     } catch (error) {
       console.error("Error generating Z-Report:", error);
+    } finally {
       setLoading(false);
-      setShowZConfirmModal(false);
     }
   };
 
-  const cancelZReport = () => {
-    setShowZConfirmModal(false);
-  };
+  const cancelZReport = () => setShowZConfirmModal(false);
 
-  const handleTimeRangeChange = (e) => {
-    setTimeRange(e.target.value.toLowerCase());
-  };
-
-  const formatCurrency = (value: number) => {
-    return `$${value.toFixed(2)}`;
-  };
-
-  // Function to format date ranges for display
-  const formatDateRange = () => {
-    try {
-      const startDate = new Date(xReportData.startDate);
-      const endDate = new Date(xReportData.endDate);
-      
-      if (timeRange === "daily") {
-        return startDate.toLocaleDateString(undefined, { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
-      } else {
-        return `${startDate.toLocaleDateString()} - ${endDate.toLocaleDateString()}`;
+  // Handle interval selection changes
+  const handleIntervalChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const interval = e.target.value;
+    setSelectedInterval(interval);
+    if (interval === "custom") {
+      setXReportData(null);
+      return;
+    }
+    const now = new Date();
+    switch (interval) {
+      case "pastHour":
+        fetchXReport("pastHour");
+        break;
+      case "today":
+        setStartDate(now.toISOString().split("T")[0]);
+        setEndDate(now.toISOString().split("T")[0]);
+        fetchXReport("today");
+        break;
+      case "thisWeek": {
+        const startOfWeek = new Date(now);
+        startOfWeek.setDate(now.getDate() - now.getDay());
+        setStartDate(startOfWeek.toISOString().split("T")[0]);
+        setEndDate(now.toISOString().split("T")[0]);
+        fetchXReport("thisWeek");
+        break;
       }
-    } catch (error) {
-      return new Date().toLocaleDateString();
+      case "thisMonth": {
+        const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+        setStartDate(startOfMonth.toISOString().split("T")[0]);
+        setEndDate(now.toISOString().split("T")[0]);
+        fetchXReport("thisMonth");
+        break;
+      }
+      case "thisYear": {
+        const startOfYear = new Date(now.getFullYear(), 0, 1);
+        setStartDate(startOfYear.toISOString().split("T")[0]);
+        setEndDate(now.toISOString().split("T")[0]);
+        fetchXReport("thisYear");
+        break;
+      }
+      default:
+        break;
     }
   };
+
+  const handleCustomDateApply = () => {
+    if (selectedInterval === "custom") {
+      fetchXReport("custom");
+    }
+  };
+
+  useEffect(() => {
+    // On initial render, fetch the "today" X-Report
+    fetchXReport("today");
+  }, []);
 
   return (
     <div className="w-full min-h-screen p-6 bg-gray-50 dark:bg-gray-900 text-gray-800 dark:text-gray-100">
-      <div className="mb-8 flex justify-between items-center">
+      <div className="mb-8">
         <h1 className="text-3xl font-bold">Reports</h1>
-        <div className="flex items-center">
-          <span className="mr-2 font-medium">Time Range:</span>
-          <select 
-            className="bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 text-gray-800 dark:text-gray-200 rounded-lg p-2 focus:ring-blue-500 focus:border-blue-500 focus:ring-2 outline-none"
-            onChange={handleTimeRangeChange}
-            value={timeRange.charAt(0).toUpperCase() + timeRange.slice(1)}
+      </div>
+
+      {/* Interval Selection & Custom Date Inputs */}
+      <div className="mb-6 flex flex-wrap items-center gap-6">
+        <div className="flex items-center gap-2">
+          <label htmlFor="interval-select" className="font-semibold">
+            Select Time Interval:
+          </label>
+          <select
+            id="interval-select"
+            value={selectedInterval}
+            onChange={handleIntervalChange}
+            className="border p-2 rounded"
           >
-            <option value="Daily">Daily</option>
-            <option value="Weekly">Weekly</option>
-            <option value="Monthly">Monthly</option>
+            <option value="pastHour">Past Hour</option>
+            <option value="today">Today</option>
+            <option value="thisWeek">This Week</option>
+            <option value="thisMonth">This Month</option>
+            <option value="thisYear">This Year</option>
+            <option value="custom">Custom Interval</option>
           </select>
         </div>
+
+        {selectedInterval === "custom" && (
+          <div className="flex flex-wrap items-center gap-4">
+            <div className="flex items-center gap-2">
+              <label className="font-semibold">Start Date:</label>
+              <input
+                type="date"
+                value={startDate}
+                onChange={(e) => setStartDate(e.target.value)}
+                className="border p-2 rounded"
+              />
+            </div>
+            <div className="flex items-center gap-2">
+              <label className="font-semibold">Start Time:</label>
+              <input
+                type="time"
+                value={startTime}
+                onChange={(e) => setStartTime(e.target.value)}
+                className="border p-2 rounded"
+              />
+            </div>
+            <div className="flex items-center gap-2">
+              <label className="font-semibold">End Date:</label>
+              <input
+                type="date"
+                value={endDate}
+                onChange={(e) => setEndDate(e.target.value)}
+                className="border p-2 rounded"
+              />
+            </div>
+            <div className="flex items-center gap-2">
+              <label className="font-semibold">End Time:</label>
+              <input
+                type="time"
+                value={endTime}
+                onChange={(e) => setEndTime(e.target.value)}
+                className="border p-2 rounded"
+              />
+            </div>
+            <button
+              onClick={handleCustomDateApply}
+              className="px-3 py-1 bg-blue-500 text-white rounded"
+            >
+              Apply
+            </button>
+          </div>
+        )}
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-        {/* X-Report Column */}
-        <div className="space-y-6">
-          <div className="flex justify-between items-center">
-            <h2 className="text-2xl font-bold mb-4">X-Report ({xReportData.periodName})</h2>
-            <span className="text-sm text-gray-500 dark:text-gray-400">
-              {formatDateRange()}
-            </span>
-          </div>
-          
-          {loading && !zReportGenerated ? (
-            <div className="flex justify-center items-center h-64 bg-white dark:bg-gray-800 rounded-xl shadow-sm">
-              <p>Loading...</p>
-            </div>
-          ) : (
-            <div className="space-y-6">
-              {/* Daily Sales Summary */}
-              <div className="bg-white dark:bg-gray-800 rounded-xl overflow-hidden shadow-sm">
-                <div className="bg-blue-100 dark:bg-blue-900 p-4 font-bold text-lg">
-                  {xReportData.periodName} Sales Summary
-                </div>
-                <div className="p-4">
-                  <div className="grid grid-cols-2 gap-y-3">
-                    <div className="font-medium">Total Orders:</div>
-                    <div className="text-right">{xReportData.totalOrders}</div>
-                    <div className="font-medium">Subtotal:</div>
-                    <div className="text-right">{formatCurrency(xReportData.subtotal)}</div>
-                    <div className="font-medium">Total Tax:</div>
-                    <div className="text-right">{formatCurrency(xReportData.totalTax)}</div>
-                    <div className="font-medium text-lg pt-2 border-t border-gray-200 dark:border-gray-700">Total Sales:</div>
-                    <div className="text-right text-lg font-bold pt-2 border-t border-gray-200 dark:border-gray-700">{formatCurrency(xReportData.totalSales)}</div>
-                  </div>
-                </div>
-              </div>
+        <XReport
+          data={xReportData}
+          loading={loading && !zReportGenerated}
+          selectedInterval={selectedInterval}
+          formatCurrency={formatCurrency}
+          formatDateRange={formatDateRange}
+        />
+        <ZReport
+          xData={xReportData}
+          zData={zReportData}
+          loading={loading}
+          zReportGenerated={zReportGenerated}
+          selectedInterval={selectedInterval}
+          formatCurrency={formatCurrency}
+          onShowZReportConfirmation={showZReportConfirmation}
+        />
+      </div>
 
-              {/* Time-based Sales */}
-              <div className="bg-white dark:bg-gray-800 rounded-xl overflow-hidden shadow-sm">
-                <div className="bg-blue-100 dark:bg-blue-900 p-4 font-bold text-lg">
-                  {xReportData.timeUnitName} Sales
-                </div>
-                <div className="overflow-hidden">
-                  <table className="w-full">
-                    <thead>
-                      <tr className="bg-gray-50 dark:bg-gray-700">
-                        <th className="p-4 text-left font-semibold">
-                          {timeRange === "daily" ? "Hour" : timeRange === "weekly" ? "Day" : "Week"}
-                        </th>
-                        <th className="p-4 text-right font-semibold">Total</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {xReportData.hourlySales.length > 0 ? (
-                        xReportData.hourlySales.map((hourData, index) => (
-                          <tr key={index} className={`border-t border-gray-200 dark:border-gray-700 ${index % 2 === 0 ? 'bg-gray-50 dark:bg-gray-800' : 'bg-white dark:bg-gray-900'}`}>
-                            <td className="p-4">{hourData.hour}</td>
-                            <td className="p-4 text-right">{formatCurrency(hourData.total)}</td>
-                          </tr>
-                        ))
-                      ) : (
-                        <tr className="border-t border-gray-200 dark:border-gray-700">
-                          <td colSpan={2} className="p-6 text-center italic text-gray-500 dark:text-gray-400">
-                            No {xReportData.timeUnitName.toLowerCase()} sales data available
-                          </td>
-                        </tr>
-                      )}
-                      <tr className="bg-gray-100 dark:bg-gray-700 font-bold">
-                        <td className="p-4">TOTAL</td>
-                        <td className="p-4 text-right">{formatCurrency(xReportData.totalSales)}</td>
-                      </tr>
-                    </tbody>
-                  </table>
-                </div>
-              </div>
-
-              {/* Product Sales */}
-              <div className="bg-white dark:bg-gray-800 rounded-xl overflow-hidden shadow-sm">
-                <div className="bg-blue-100 dark:bg-blue-900 p-4 font-bold text-lg">
-                  Product Sales
-                </div>
-                <div className="overflow-hidden">
-                  <table className="w-full">
-                    <thead>
-                      <tr className="bg-gray-50 dark:bg-gray-700">
-                        <th className="p-4 text-left font-semibold">Product</th>
-                        <th className="p-4 text-right font-semibold">Quantity</th>
-                        <th className="p-4 text-right font-semibold">Total</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {xReportData.productSales.length > 0 ? (
-                        xReportData.productSales.map((product, index) => (
-                          <tr key={index} className={`border-t border-gray-200 dark:border-gray-700 ${index % 2 === 0 ? 'bg-gray-50 dark:bg-gray-800' : 'bg-white dark:bg-gray-900'}`}>
-                            <td className="p-4">{product.name}</td>
-                            <td className="p-4 text-right">{product.quantity}</td>
-                            <td className="p-4 text-right">{formatCurrency(product.total)}</td>
-                          </tr>
-                        ))
-                      ) : (
-                        <tr className="border-t border-gray-200 dark:border-gray-700">
-                          <td colSpan={3} className="p-6 text-center italic text-gray-500 dark:text-gray-400">No product sales data available</td>
-                        </tr>
-                      )}
-                      <tr className="bg-gray-100 dark:bg-gray-700 font-bold">
-                        <td className="p-4">TOTAL</td>
-                        <td className="p-4 text-right">{xReportData.productSales.reduce((sum, product) => sum + product.quantity, 0)}</td>
-                        <td className="p-4 text-right">{formatCurrency(xReportData.subtotal)}</td>
-                      </tr>
-                    </tbody>
-                  </table>
-                </div>
-              </div>
-
-              {/* Employee Performance */}
-              <div className="bg-white dark:bg-gray-800 rounded-xl overflow-hidden shadow-sm">
-                <div className="bg-blue-100 dark:bg-blue-900 p-4 font-bold text-lg">
-                  Employee Performance
-                </div>
-                <div className="overflow-hidden">
-                  <table className="w-full">
-                    <thead>
-                      <tr className="bg-gray-50 dark:bg-gray-700">
-                        <th className="p-4 text-left font-semibold">Employee</th>
-                        <th className="p-4 text-right font-semibold">Orders</th>
-                        <th className="p-4 text-right font-semibold">Sales</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {xReportData.employeePerformance.length > 0 ? (
-                        xReportData.employeePerformance.map((employee, index) => (
-                          <tr key={index} className={`border-t border-gray-200 dark:border-gray-700 ${index % 2 === 0 ? 'bg-gray-50 dark:bg-gray-800' : 'bg-white dark:bg-gray-900'}`}>
-                            <td className="p-4">{employee.name}</td>
-                            <td className="p-4 text-right">{employee.orders}</td>
-                            <td className="p-4 text-right">{formatCurrency(employee.sales)}</td>
-                          </tr>
-                        ))
-                      ) : (
-                        <tr className="border-t border-gray-200 dark:border-gray-700">
-                          <td colSpan={3} className="p-6 text-center italic text-gray-500 dark:text-gray-400">No employee performance data available</td>
-                        </tr>
-                      )}
-                      <tr className="bg-gray-100 dark:bg-gray-700 font-bold">
-                        <td className="p-4">TOTAL</td>
-                        <td className="p-4 text-right">{xReportData.totalOrders}</td>
-                        <td className="p-4 text-right">{formatCurrency(xReportData.totalSales)}</td>
-                      </tr>
-                    </tbody>
-                  </table>
-                </div>
-              </div>
-            </div>
-          )}
-        </div>
-
-        {/* Z-Report Column */}
-        <div>
-          <div className="flex justify-between items-center mb-4">
-            <h2 className="text-2xl font-bold">
-              Z-Report {zReportData ? `(${zReportData.periodName})` : `(${xReportData.periodName})`}
-            </h2>
-            <button 
-              onClick={showZReportConfirmation}
-              className="bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700 text-white px-5 py-2.5 rounded-lg font-medium focus:outline-none focus:ring-2 focus:ring-blue-300 dark:focus:ring-blue-800"
-              disabled={loading}
-            >
-              Generate Z-Report
-            </button>
-          </div>
-
-          {!zReportGenerated ? (
-            <div className="bg-white dark:bg-gray-800 rounded-xl p-8 h-64 flex items-center justify-center shadow-sm text-center">
-              <div>
-                <p className="text-gray-500 dark:text-gray-400 italic mb-2">
-                  Z-Report will appear here after generation.
-                </p>
-                <p className="text-sm text-gray-500 dark:text-gray-400">
-                  Note: Generating a Z-Report will clear the X-Report data.
-                </p>
-              </div>
-            </div>
-          ) : loading ? (
-            <div className="flex justify-center items-center h-64 bg-white dark:bg-gray-800 rounded-xl shadow-sm">
-              <p>Loading...</p>
-            </div>
-          ) : (
-            <div className="space-y-6">
-              {/* Z-Report Sales Summary */}
-              <div className="bg-white dark:bg-gray-800 rounded-xl overflow-hidden shadow-sm">
-                <div className="bg-green-100 dark:bg-green-900 p-4 font-bold text-lg">
-                  Z-Report: {zReportData?.periodName || ""} Sales Summary
-                </div>
-                <div className="p-4">
-                  <div className="grid grid-cols-2 gap-y-3">
-                    <div className="font-medium">Total Orders:</div>
-                    <div className="text-right">{zReportData?.totalOrders || 0}</div>
-                    <div className="font-medium">Subtotal:</div>
-                    <div className="text-right">{formatCurrency(zReportData?.subtotal || 0)}</div>
-                    <div className="font-medium">Total Tax:</div>
-                    <div className="text-right">{formatCurrency(zReportData?.totalTax || 0)}</div>
-                    <div className="font-medium text-lg pt-2 border-t border-gray-200 dark:border-gray-700">Total Sales:</div>
-                    <div className="text-right text-lg font-bold pt-2 border-t border-gray-200 dark:border-gray-700">{formatCurrency(zReportData?.totalSales || 0)}</div>
-                  </div>
-                </div>
-              </div>
-
-              {/* Ingredients Used */}
-              <div className="bg-white dark:bg-gray-800 rounded-xl overflow-hidden shadow-sm">
-                <div className="bg-green-100 dark:bg-green-900 p-4 font-bold text-lg">
-                  Ingredients Used {zReportData?.periodText || ""}
-                </div>
-                <div className="overflow-hidden">
-                  {zReportData?.ingredientsUsed && zReportData.ingredientsUsed.length > 0 ? (
-                    <table className="w-full">
-                      <thead>
-                        <tr className="bg-gray-50 dark:bg-gray-700">
-                          <th className="p-4 text-left font-semibold">Ingredient</th>
-                          <th className="p-4 text-right font-semibold">Count</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {zReportData.ingredientsUsed.map((ingredient, index) => (
-                          <tr key={index} className={`border-t border-gray-200 dark:border-gray-700 ${index % 2 === 0 ? 'bg-gray-50 dark:bg-gray-800' : 'bg-white dark:bg-gray-900'}`}>
-                            <td className="p-4">{ingredient.name}</td>
-                            <td className="p-4 text-right">{ingredient.count}</td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  ) : (
-                    <p className="p-6 text-center italic text-gray-500 dark:text-gray-400">
-                      No ingredient usage data available
-                    </p>
-                  )}
-                </div>
-              </div>
-
-              {/* Sales Per Employee */}
-              <div className="bg-white dark:bg-gray-800 rounded-xl overflow-hidden shadow-sm">
-                <div className="bg-green-100 dark:bg-green-900 p-4 font-bold text-lg">
-                  Sales Per Employee
-                </div>
-                <div className="overflow-hidden">
-                  {zReportData?.salesPerEmployee && zReportData.salesPerEmployee.length > 0 ? (
-                    <table className="w-full">
-                      <thead>
-                        <tr className="bg-gray-50 dark:bg-gray-700">
-                          <th className="p-4 text-left font-semibold">Employee</th>
-                          <th className="p-4 text-right font-semibold">Orders</th>
-                          <th className="p-4 text-right font-semibold">Sales</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {zReportData.salesPerEmployee.map((employee, index) => (
-                          <tr key={index} className={`border-t border-gray-200 dark:border-gray-700 ${index % 2 === 0 ? 'bg-gray-50 dark:bg-gray-800' : 'bg-white dark:bg-gray-900'}`}>
-                            <td className="p-4">{employee.name}</td>
-                            <td className="p-4 text-right">{employee.orders}</td>
-                            <td className="p-4 text-right">{formatCurrency(employee.sales)}</td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  ) : (
-                    <p className="p-6 text-center italic text-gray-500 dark:text-gray-400">
-                      No employee sales data available
-                    </p>
-                  )}
-                </div>
-              </div>
-              
-              {/* Z-Report Timestamp */}
-              {zReportData?.generatedAt && (
-                <div className="text-right text-sm text-gray-500 dark:text-gray-400 p-2">
-                  Generated: {new Date(zReportData.generatedAt).toLocaleString()}
-                </div>
-              )}
-            </div>
-          )}
-        </div>
+      <div className="mt-8">
+        <ChartPage />
       </div>
 
       {/* Z-Report Confirmation Modal */}
       {showZConfirmModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white dark:bg-gray-800 rounded-xl p-6 max-w-md w-full shadow-lg">
-            <h3 className="text-xl font-bold mb-4 text-gray-900 dark:text-white">Generate Z-Report</h3>
+            <h3 className="text-xl font-bold mb-4 text-gray-900 dark:text-white">
+              Generate Z-Report
+            </h3>
             <div className="mb-6 p-4 bg-yellow-50 dark:bg-yellow-900/30 border-l-4 border-yellow-500 dark:border-yellow-600 text-yellow-800 dark:text-yellow-200">
               <p className="font-medium mb-1">Warning</p>
               <p className="text-sm">
-                The Z-Report should only be run once per {timeRange === "daily" ? "day" : timeRange === "weekly" ? "week" : "month"}, 
-                typically at the end of business. 
-                Generating a Z-Report will clear all current X-Report data.
+                The Z-Report should only be run once per{" "}
+                {selectedInterval === "today"
+                  ? "day"
+                  : selectedInterval === "thisWeek"
+                  ? "week"
+                  : selectedInterval === "thisMonth"
+                  ? "month"
+                  : "period"}
+                , typically at the end of business. Generating a Z-Report will clear all current X-Report data.
               </p>
             </div>
             <p className="mb-6 text-gray-700 dark:text-gray-300">
               Are you sure you want to continue?
             </p>
             <div className="flex justify-end gap-4">
-              <button 
+              <button
                 onClick={cancelZReport}
                 className="px-4 py-2 rounded-lg bg-gray-200 hover:bg-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-800 dark:text-gray-200 font-medium"
               >
                 Cancel
               </button>
-              <button 
+              <button
                 onClick={generateZReport}
                 className="px-4 py-2 rounded-lg bg-red-500 hover:bg-red-600 dark:bg-red-600 dark:hover:bg-red-700 text-white font-medium"
               >

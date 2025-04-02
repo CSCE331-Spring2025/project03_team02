@@ -9,7 +9,7 @@ const Layout: React.FC = () => {
     const location = useLocation();
     const path = location.pathname;
     const currentPage = path.includes("inventory") ? "inventory" : 
-                        path.includes("trends") ? "trends" : "menu";
+                        path.includes("reports") ? "reports" : path.includes('employees') ? 'employees' : "menu";
 
     return (
         <div className="flex flex-col min-h-screen">
@@ -19,7 +19,7 @@ const Layout: React.FC = () => {
             {/* Main content */}
             <main className="flex flex-1 gap-4">
                 <div className="w-1/12 min-w-[100px]">
-                    <SideMenu currentPage={currentPage as "menu" | "inventory" | "trends"} />
+                    <SideMenu currentPage={currentPage as "menu" | "inventory" | "reports" | "employees"} />
                 </div>
                 <div className="w-11/12 px-4">
                     <Outlet />
