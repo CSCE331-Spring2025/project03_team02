@@ -12,6 +12,7 @@ class Employee(db.Model):
     id = db.Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4, nullable=False)
     name = db.Column(db.Text, nullable=False)
     is_manager = db.Column(db.Boolean, nullable=False, default=False)
+    email = db.Column(db.Text, nullable=False, default=False)
 
     orders = db.relationship('OrderTable', backref='employee', cascade="all, delete", lazy=True)
 
