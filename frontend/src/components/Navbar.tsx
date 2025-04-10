@@ -3,12 +3,19 @@ import React, {useEffect} from "react";
 import ShareteaLogo from "../assets/shartea_logo.png"
 import USA_Flag from "../assets/usa_flag.png";
 
+declare global {
+    interface Window {
+        google: any;
+        googleTranslateElementInit: () => void;
+    }
+}
+
 const Navbar: React.FC = () => {
     useEffect(() => {
         // Define the callback Google expects
         window.googleTranslateElementInit = () => {
             new window.google.translate.TranslateElement( {pageLanguage: 'en', 
-                layout: window.google.translate.TranslateElement.InlineLayout.SIMPLE,}, 
+                layout: window.google.translate.TranslateElement.InlineLayout.VERTICAL,}, 
                 'google_translate_element');
         };
         
