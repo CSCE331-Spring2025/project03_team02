@@ -1,7 +1,7 @@
 import React from "react";
 
 import ShareteaLogo from "../assets/shartea_logo.png"
-import USA_Flag from "../assets/usa_flag.png";
+import LanguageTranslation from "./LanguageTranslation";
 
 const Navbar: React.FC = () => {
     return (
@@ -9,8 +9,7 @@ const Navbar: React.FC = () => {
             <img src={ShareteaLogo} alt="Sharetea logo" />
 
             <span className="flex gap-x-2 items-center">
-                <img src={USA_Flag} className="h-4" alt="Flag of The United States of America" />
-                <p>English</p>
+                <LanguageTranslation />
             </span>
         </div>
     )
