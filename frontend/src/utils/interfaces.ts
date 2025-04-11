@@ -39,3 +39,15 @@ export interface IProductOrder {
   product?: IProduct;
   order?: IOrderTable;
 }
+
+export interface IUser {
+  email: string
+  email_verfied: boolean
+  family_name: string
+  given_name: string
+  hd: string
+  name: string
+  picture: string
+  sub: string
+  is_manager: boolean
+}

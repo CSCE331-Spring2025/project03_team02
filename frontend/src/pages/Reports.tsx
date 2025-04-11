@@ -1,11 +1,15 @@
 // Reports.tsx
 import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router";
 import axios from "axios";
 import XReport, { ReportData } from "../components/XReport";
 import ZReport from "../components/ZReport";
 import ChartPage from "./ChartPage";
+import useAppStore from "../utils/useAppStore";
 
 const Reports: React.FC = () => {
+  const navigate = useNavigate();
+
   // Combined States
   const [loading, setLoading] = useState(false);
   const [xReportData, setXReportData] = useState<ReportData | null>(null);
@@ -17,6 +21,8 @@ const Reports: React.FC = () => {
   const [endDate, setEndDate] = useState<string>(new Date().toISOString().split("T")[0]);
   const [startTime, setStartTime] = useState<string>("00:00:00");
   const [endTime, setEndTime] = useState<string>("23:59:59");
+
+  const user = useAppStore(state => state.user);
 
   // Utility functions
   const formatCurrency = (value: number) => `$${value.toFixed(2)}`;
@@ -184,6 +190,10 @@ const Reports: React.FC = () => {
     // On initial render, fetch the "today" X-Report
     fetchXReport("today");
   }, []);
+
+  if(!user || !user.is_manager) {
+    navigate("/signin");
+  }
 
   return (
     <div className="w-full min-h-screen p-6 bg-gray-50 dark:bg-gray-900 text-gray-800 dark:text-gray-100">

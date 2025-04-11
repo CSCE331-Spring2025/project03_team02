@@ -1,28 +1,37 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import React, { useState } from "react";
-import { CodeResponse, useGoogleLogin } from '@react-oauth/google';
+import axios from "axios";
+import { CodeResponse, useGoogleLogin } from "@react-oauth/google";
 import { useNavigate } from "react-router";
-import { FcGoogle } from 'react-icons/fc';
+import useAppStore from "../utils/useAppStore";
+import { FcGoogle } from "react-icons/fc";
 
 const SignInPage: React.FC = () => {
     const navigate = useNavigate();
-
     const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
+    const setUser = useAppStore(state => state.setUser);
+
     async function getUserInfo(codeResponse: CodeResponse) {
-        const response = await fetch(`${import.meta.env.VITE_API_URL}/google_login`, {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-            },
-            body: JSON.stringify({ code: codeResponse.code }),
-        });
+        try {
+            const response = await axios.post(
+                `${import.meta.env.VITE_API_URL}/google_login`,
+                { code: codeResponse.code },
+                {
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                }
+            );
 
-        if (!response.ok) {
-            const error = await response.json();
-            throw new Error(error.message || "Login failed");
+            return response.data;
+        } catch (error: any) {
+            if (error.response && error.response.data) {
+                throw new Error(error.response.data.message || "Login failed");
+            } else {
+                throw new Error("Login failed");
+            }
         }
-
-        return await response.json();
     }
 
     const googleLogin = useGoogleLogin({
@@ -31,25 +40,47 @@ const SignInPage: React.FC = () => {
             try {
                 const loginDetails = await getUserInfo(codeResponse);
                 if (loginDetails) {
-                    navigate('/')
+                    // Navigate to the employee view upon successful login.
+                    setUser(loginDetails.user)
+                    navigate("/");
                 }
-                // eslint-disable-next-line @typescript-eslint/no-explicit-any
             } catch (err: any) {
                 setErrorMessage(err.message);
             }
         },
     });
 
+    // Direct navigation for the customer view (no sign-in required)
+    const handleCustomerView = () => {
+        navigate("/customer");
+    };
+
     return (
         <div className="relative min-h-screen flex flex-col justify-center items-center bg-gray-50 px-4">
-            {/* Overlay Alert */}
+            {/* Overlay Alert for Error Messages */}
             {errorMessage && (
                 <div className="fixed inset-0 bg-opacity-50 z-50 m-auto mt-4 w-3xl">
-                    <div role="alert" className="bg-white p-6 rounded-lg shadow-lg flex items-center space-x-3">
-                        <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-red-500" fill="none" viewBox="0 0 24 24">
-                            <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    <div
+                        role="alert"
+                        className="bg-white p-6 rounded-lg shadow-lg flex items-center space-x-3"
+                    >
+                        <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            className="h-6 w-6 text-red-500"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                        >
+                            <path
+                                stroke="currentColor"
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth="2"
+                                d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"
+                            />
                         </svg>
-                        <span className="text-red-600 font-semibold">{errorMessage}</span>
+                        <span className="text-red-600 font-semibold">
+                            {errorMessage}
+                        </span>
                         <button
                             onClick={() => setErrorMessage(null)}
                             className="ml-auto text-sm text-gray-500 hover:text-gray-700"
@@ -60,14 +91,25 @@ const SignInPage: React.FC = () => {
                 </div>
             )}
 
-            {/* Sign-In UI */}
-            <button
-                onClick={() => googleLogin()}
-                className="flex items-center justify-center w-full max-w-sm px-4 py-2 border border-gray-300 rounded-lg shadow-sm hover:shadow-md transition duration-200 bg-white text-gray-700 mb-6"
-            >
-                <FcGoogle className="mr-2 text-xl" />
-                Sign in with Google
-            </button>
+            {/* Sign In UI with Two Options */}
+            <div className="flex flex-col space-y-4 w-full max-w-sm">
+                {/* Employee sign in button */}
+                <button
+                    onClick={() => googleLogin()}
+                    className="flex items-center justify-center px-4 py-2 border border-gray-300 rounded-lg shadow-sm hover:shadow-md transition duration-200 bg-white text-gray-700"
+                >
+                    <FcGoogle className="mr-2 text-xl" />
+                    Sign in with Google (Employee)
+                </button>
+
+                {/* Customer view button */}
+                <button
+                    onClick={handleCustomerView}
+                    className="flex items-center justify-center px-4 py-2 border border-gray-300 rounded-lg shadow-sm hover:shadow-md transition duration-200 bg-blue-500 text-white"
+                >
+                    Continue as Customer
+                </button>
+            </div>
         </div>
     );
 };

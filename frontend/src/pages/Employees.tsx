@@ -1,10 +1,14 @@
 import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router";
 import { v4 as uuid } from "uuid";
 import axios from "axios";
+import useAppStore from "../utils/useAppStore";
 
 import { IEmployee } from "../utils/interfaces";
 
 const EmployeesPage: React.FC = () => {
+  const navigate = useNavigate();
+  
   const [employees, setEmployees] = useState<IEmployee[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -17,6 +21,8 @@ const EmployeesPage: React.FC = () => {
     name: "",
     is_manager: false
   });
+
+  const user = useAppStore(state => state.user);
 
   // Get all employees
   const getEmployees = async () => {
@@ -170,6 +176,10 @@ const EmployeesPage: React.FC = () => {
   useEffect(() => {
     getEmployees();
   }, []);
+
+  if(!user || !user.is_manager) {
+    navigate("/signin");
+  }
 
   return (
     <div className="w-full p-6">

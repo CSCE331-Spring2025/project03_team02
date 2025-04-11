@@ -1,14 +1,22 @@
 import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router";
 import axios from "axios";
 import { IIngredient, IProduct } from "../utils/interfaces";
+import useAppStore from "../utils/useAppStore";
 
 const InventoryPage: React.FC = () => {
+  const navigate = useNavigate();
+
   const [products, setProducts] = useState<IProduct[]>([]);
   const [ingredients, setIngredients] = useState<IIngredient[]>([]);
   const [tableType, setTableType] = useState<"Ingredients" | "Products">("Ingredients");
   const [selectedRow, setSelectedRow] = useState<IIngredient | IProduct | null>(null);
   const [quantityField, setQuantityField] = useState<string>("0");
   const [orderQuantityField, setOrderQuantityField] = useState<string>("10");
+
+  const user = useAppStore(state => state.user);
+
+  console.log(user);
 
   const getProducts = async () => {
     const res = (await axios.get(`${import.meta.env.VITE_API_URL}/getproducts`)).data;
@@ -122,6 +130,10 @@ const InventoryPage: React.FC = () => {
     getProducts();
     getIngredients();
   }, [])
+
+  if (!user || !user['is_manager']) {
+    navigate("/signin")
+  }
 
   return (
     <div className="flex flex-col h-screen">

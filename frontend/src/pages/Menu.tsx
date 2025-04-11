@@ -1,10 +1,14 @@
 import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router";
 import axios from "axios";
 import { IIngredient, IProduct } from "../utils/interfaces";
+import useAppStore from "../utils/useAppStore";
 
 import CustomizationModal from "../components/CustomizationModal";
 
 const MenuPage: React.FC = () => {
+  const navigate = useNavigate();
+  
   const [loading, setLoading] = useState(false);
   
   const [selectedProduct, setSelectedProduct] = useState<IProduct | null>();
@@ -14,8 +18,9 @@ const MenuPage: React.FC = () => {
 
   const [cart, setCart] = useState<IProduct[]>([]);
 
+  const user = useAppStore(state => state.user);
+
   useEffect(() => {
-    console.log("API URL:", import.meta.env.VITE_API_URL);
     getProducts();
     getIngredients();
   }, []);
@@ -92,6 +97,10 @@ const MenuPage: React.FC = () => {
       document.getElementById('customization-modal').showModal()
     }
   }, [selectedProduct])
+
+  if(!user || !user.is_manager) {
+    navigate("/signin");
+  }
 
   return (
     <div className='w-full h-full p-4'>
