@@ -1,9 +1,9 @@
 import os
 from dotenv import load_dotenv
-from flask import Flask, jsonify
+from flask import Flask
 from flask_cors import CORS
-from database import db, Employee
-import logging
+from flask_jwt_extended import JWTManager
+from database import db
 
 from routes.product_routes import product_routes_bp
 from routes.ingredient_routes import ingredient_routes_bp
@@ -12,6 +12,7 @@ from routes.report_routes import report_routes_bp
 from routes.employee_routes import employee_routes_bp
 from routes.sales_report_routes import sales_report_routes_bp
 from routes.charts_routes import charts_routes_bp
+from routes.auth_routes import auth_routes_bp
 
 load_dotenv()
 
@@ -22,8 +23,10 @@ CORS(app, supports_credentials=True)
 # Configure database
 app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URL')
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+app.config["JWT_SECRET_KEY"] = os.environ.get('JWT_SECERT')
 
 db.init_app(app)
+jwt = JWTManager(app)
 
 # Initialize app with blueprints
 with app.app_context():
@@ -36,6 +39,7 @@ with app.app_context():
     app.register_blueprint(employee_routes_bp)
     app.register_blueprint(sales_report_routes_bp)
     app.register_blueprint(charts_routes_bp)
+    app.register_blueprint(auth_routes_bp)
 
 @app.route('/')
 def home():
