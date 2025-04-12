@@ -28,6 +28,7 @@ export interface IProduct {
   price: number;
   customizations?: string | null;
   has_boba: boolean;
+  is_seasonal: boolean;
   ingredients: IIngredient[]
 }
 

@@ -20,7 +20,8 @@ CREATE TABLE product (
     name VARCHAR(255) UNIQUE NOT NULL,
     description TEXT NOT NULL,
     price NUMERIC(10, 2) NOT NULL,
-    has_boba BOOLEAN NOT NULL DEFAULT FALSE
+    has_boba BOOLEAN NOT NULL DEFAULT FALSE,
+    is_seasonal BOOLEAN NOT NULL DEFAULT FALSE
 );
 
 -- Ingredient Table
