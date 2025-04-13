@@ -6,6 +6,18 @@ import useAppStore from "../utils/useAppStore";
 
 import CustomizationModal from "../components/CustomizationModal";
 
+
+// Function to speak text using the Web Speech API
+// Uses Browser's speech synthesis to read out the text
+const speak = (text: string) => {
+  if ('speechSynthesis' in window) {
+    const utterance = new SpeechSynthesisUtterance(text);
+    utterance.rate = 1;
+    window.speechSynthesis.cancel();
+    window.speechSynthesis.speak(utterance);
+  }
+};
+
 const MenuPage: React.FC = () => {
   const navigate = useNavigate();
   
@@ -17,6 +29,8 @@ const MenuPage: React.FC = () => {
   const [totals, setTotals] = useState([0, 0, 0]) // subtotal, tax, total
 
   const [cart, setCart] = useState<IProduct[]>([]);
+
+  const [ttsEnabled, setTtsEnabled] = useState<boolean>(false);
 
   const user = useAppStore(state => state.user);
 
@@ -75,8 +89,13 @@ const MenuPage: React.FC = () => {
 
     await axios.post(`${import.meta.env.VITE_API_URL}/submitorder`, { 'products': products, 'ingredients': ingredients, 'employee_id': employee_id, 'total': total });
     
-    setLoading(false)
-    resetOrder()
+    setLoading(false);
+    resetOrder();
+
+    if (ttsEnabled) {
+      speak("Order submitted successfully");
+    }
+
     alert("Order submitted successfully");
   }
   const resetOrder = () => {
@@ -106,11 +125,21 @@ const MenuPage: React.FC = () => {
     <div className='w-full h-full p-4'>
       {products.length > 0 && selectedProduct && (
         <CustomizationModal
-          product={selectedProduct} // Pass the first product or use a selected one
-          ingredients={ingredients}
-          onSubmit={addProductToCart}
+        product={selectedProduct}
+        ingredients={ingredients}
+        onSubmit={addProductToCart}
+        ttsEnabled={ttsEnabled}
         />
       )}
+      <div className="mb-4 flex justify-end">
+        <button
+          className={`px-4 py-2 rounded-md font-semibold ${ttsEnabled ? 'bg-blue-600 text-white' : 'bg-gray-200 text-black'
+            }`}
+          onClick={() => setTtsEnabled(prev => !prev)}
+        >
+          {ttsEnabled ? 'Disable TTS Mode' : 'Enable TTS Mode'}
+        </button>
+      </div>
 
       <div className='flex gap-8 h-full'>
         <div className='w-2/3 flex flex-wrap gap-6 border-r-2 border-gray-100'>
@@ -118,8 +147,13 @@ const MenuPage: React.FC = () => {
           {products.map((product, index) => (
             <button
               key={index}
-              className='bg-gray-100 p-4 rounded-xl w-[180px] h-[100px] flex flex-col justify-between shadow-sm hover:bg-gray-200 cursor-pointer'
+              className='bg-gray-100 p-4 rounded-xl w-[180px] h-[100px] flex flex-col justify-between shadow-sm hover:bg-gray-200 cursor-pointer focus:outline-none focus:ring-2 focus:ring-blue-400'
               onClick={() => setSelectedProduct(product)}
+              onMouseEnter={() => {
+                if (ttsEnabled) {
+                  speak(`${product.name}, $${product.price.toFixed(2)}`);
+                }
+              }}
             >
               <p className='text-base font-bold truncate'>{product.name}</p>
               <p className='text-sm text-gray-700'>${Number(product.price).toFixed(2)}</p>
@@ -146,29 +180,49 @@ const MenuPage: React.FC = () => {
           </div>
 
           <div className="p-4 space-y-4 border border-gray-100">
-            <div className="flex justify-between">
+            <div
+              className="flex justify-between"
+              onMouseEnter={() => ttsEnabled && speak(`Subtotal: $${totals[0].toFixed(2)}`)}
+            >
               <p>Subtotal</p>
-
               <p>${totals[0].toFixed(2)}</p>
             </div>
 
-            <div className="flex justify-between">
+            <div
+              className="flex justify-between"
+              onMouseEnter={() => ttsEnabled && speak(`Tax: $${totals[1].toFixed(2)}`)}
+            >
               <p>Tax 8.25%</p>
-
               <p>${totals[1].toFixed(2)}</p>
             </div>
 
-            <div className="flex justify-between text-2xl font-bold">
+            <div
+              className="flex justify-between text-2xl font-bold"
+              onMouseEnter={() => ttsEnabled && speak(`Total: $${totals[2].toFixed(2)}`)}
+            >
               <p>Total</p>
-
               <p>${totals[2].toFixed(2)}</p>
             </div>
 
             <div className="flex gap-x-8 my-8">
-              <button className="bg-red-500 text-white p-3 rounded-2xl w-full hover:bg-red-600 cursor-pointer" onClick={resetOrder}>Cancel Order</button>
+              <button
+                className="bg-red-500 text-white p-3 rounded-2xl w-full hover:bg-red-600 cursor-pointer"
+                onClick={resetOrder}
+                onMouseEnter={() => ttsEnabled && speak("Cancel Order")}
+              >
+                Cancel Order
+              </button>
 
-              <button className="bg-green-500 text-white p-3 rounded-2xl w-full hover:bg-green-600 cursor-pointer" onClick={submitOrder}>
-                { loading ? <span className="loading loading-spinner loading-md"></span> : <span>Submit Order</span> }
+              <button
+                className="bg-green-500 text-white p-3 rounded-2xl w-full hover:bg-green-600 cursor-pointer"
+                onClick={submitOrder}
+                onMouseEnter={() => ttsEnabled && speak("Submit Order")}
+              >
+                {loading ? (
+                  <span className="loading loading-spinner loading-md"></span>
+                ) : (
+                  <span>Submit Order</span>
+                )}
               </button>
             </div>
           </div>
