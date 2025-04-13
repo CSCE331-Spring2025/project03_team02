@@ -89,8 +89,13 @@ const MenuPage: React.FC = () => {
 
     await axios.post(`${import.meta.env.VITE_API_URL}/submitorder`, { 'products': products, 'ingredients': ingredients, 'employee_id': employee_id, 'total': total });
     
-    setLoading(false)
-    resetOrder()
+    setLoading(false);
+    resetOrder();
+
+    if (ttsEnabled) {
+      speak("Order submitted successfully");
+    }
+
     alert("Order submitted successfully");
   }
   const resetOrder = () => {
