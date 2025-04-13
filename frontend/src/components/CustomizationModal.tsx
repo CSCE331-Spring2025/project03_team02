@@ -3,19 +3,19 @@ import { IIngredient, IProduct } from "../utils/interfaces";
 
 const speak = (text: string) => {
     if ('speechSynthesis' in window) {
-      window.speechSynthesis.cancel();
-      const utterance = new SpeechSynthesisUtterance(text);
-      utterance.rate = 1;
-      window.speechSynthesis.speak(utterance);
+        window.speechSynthesis.cancel();
+        const utterance = new SpeechSynthesisUtterance(text);
+        utterance.rate = 1;
+        window.speechSynthesis.speak(utterance);
     }
-  };  
+};
 
 interface Props {
     product: IProduct
     onSubmit: (product: IProduct) => void
     ingredients: IIngredient[]
     ttsEnabled: boolean
-  }  
+}
 
 const CustomizationModal: React.FC<Props> = ({ product, onSubmit, ingredients, ttsEnabled }) => {
     const sizes = [
@@ -52,13 +52,13 @@ const CustomizationModal: React.FC<Props> = ({ product, onSubmit, ingredients, t
     useEffect(() => {
         setSelectedSize("small");
         setSelectedToppings(ingredients.filter(ing =>
-          product?.ingredients?.some(pi => pi.id === ing.id)
+            product?.ingredients?.some(pi => pi.id === ing.id)
         ));
-      
+
         if (ttsEnabled) {
-          speak(`${product.name}. ${product.description}`);
+            speak(`${product.name}. ${product.description}`);
         }
-      }, [ingredients, product, ttsEnabled]);      
+    }, [ingredients, product, ttsEnabled]);
 
     return (
         <dialog id="customization-modal" className="modal modal-bottom sm:modal-middle">
@@ -93,19 +93,21 @@ const CustomizationModal: React.FC<Props> = ({ product, onSubmit, ingredients, t
                 </div>
 
                 {/* Toppings */}
-                {ingredients.map((ingredient, index) => (
-                    <button
-                        key={index}
-                        onClick={() => toggleTopping(ingredient)}
-                        onMouseEnter={() => ttsEnabled && speak(ingredient.name)}
-                        className={`p-2 rounded-md text-sm text-center ${selectedToppings.includes(ingredient)
-                            ? "bg-green-500 text-white"
-                            : "bg-gray-100 hover:bg-gray-200"
-                            }`}
-                    >
-                        {ingredient.name.toUpperCase()}
-                    </button>
-                ))}
+                <div className="flex flex-wrap space-x-2 space-y-2">
+                    {ingredients.map((ingredient, index) => (
+                        <button
+                            key={index}
+                            onClick={() => toggleTopping(ingredient)}
+                            onMouseEnter={() => ttsEnabled && speak(ingredient.name)}
+                            className={`p-2 rounded-md text-sm text-center ${selectedToppings.includes(ingredient)
+                                ? "bg-green-500 text-white"
+                                : "bg-gray-100 hover:bg-gray-200"
+                                }`}
+                        >
+                            {ingredient.name.toUpperCase()}
+                        </button>
+                    ))}
+                </div>
 
 
                 {/* Custom Text Input */}
@@ -116,10 +118,10 @@ const CustomizationModal: React.FC<Props> = ({ product, onSubmit, ingredients, t
                     onMouseEnter={() => ttsEnabled && speak("Customization text input")}
                     onFocus={() => ttsEnabled && speak("Customization text input")}
                 />
-                
+
                 {/* Buttons */}
                 <div className="flex justify-end gap-4">
-                <form method="dialog">
+                    <form method="dialog">
                         <button
                             className="btn bg-red-500 text-white px-6 py-2 rounded-lg hover:bg-red-600 transition"
                             onMouseEnter={() => ttsEnabled && speak("Cancel")}
