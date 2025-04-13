@@ -120,9 +120,10 @@ const MenuPage: React.FC = () => {
     <div className='w-full h-full p-4'>
       {products.length > 0 && selectedProduct && (
         <CustomizationModal
-          product={selectedProduct} // Pass the first product or use a selected one
-          ingredients={ingredients}
-          onSubmit={addProductToCart}
+        product={selectedProduct}
+        ingredients={ingredients}
+        onSubmit={addProductToCart}
+        ttsEnabled={ttsEnabled}
         />
       )}
       <div className="mb-4 flex justify-end">
@@ -131,7 +132,7 @@ const MenuPage: React.FC = () => {
             }`}
           onClick={() => setTtsEnabled(prev => !prev)}
         >
-          {ttsEnabled ? 'Disable TTS Mode 🔇' : 'Enable TTS Mode 🔊'}
+          {ttsEnabled ? 'Disable TTS Mode' : 'Enable TTS Mode'}
         </button>
       </div>
 
@@ -174,29 +175,49 @@ const MenuPage: React.FC = () => {
           </div>
 
           <div className="p-4 space-y-4 border border-gray-100">
-            <div className="flex justify-between">
+            <div
+              className="flex justify-between"
+              onMouseEnter={() => ttsEnabled && speak(`Subtotal: $${totals[0].toFixed(2)}`)}
+            >
               <p>Subtotal</p>
-
               <p>${totals[0].toFixed(2)}</p>
             </div>
 
-            <div className="flex justify-between">
+            <div
+              className="flex justify-between"
+              onMouseEnter={() => ttsEnabled && speak(`Tax: $${totals[1].toFixed(2)}`)}
+            >
               <p>Tax 8.25%</p>
-
               <p>${totals[1].toFixed(2)}</p>
             </div>
 
-            <div className="flex justify-between text-2xl font-bold">
+            <div
+              className="flex justify-between text-2xl font-bold"
+              onMouseEnter={() => ttsEnabled && speak(`Total: $${totals[2].toFixed(2)}`)}
+            >
               <p>Total</p>
-
               <p>${totals[2].toFixed(2)}</p>
             </div>
 
             <div className="flex gap-x-8 my-8">
-              <button className="bg-red-500 text-white p-3 rounded-2xl w-full hover:bg-red-600 cursor-pointer" onClick={resetOrder}>Cancel Order</button>
+              <button
+                className="bg-red-500 text-white p-3 rounded-2xl w-full hover:bg-red-600 cursor-pointer"
+                onClick={resetOrder}
+                onMouseEnter={() => ttsEnabled && speak("Cancel Order")}
+              >
+                Cancel Order
+              </button>
 
-              <button className="bg-green-500 text-white p-3 rounded-2xl w-full hover:bg-green-600 cursor-pointer" onClick={submitOrder}>
-                { loading ? <span className="loading loading-spinner loading-md"></span> : <span>Submit Order</span> }
+              <button
+                className="bg-green-500 text-white p-3 rounded-2xl w-full hover:bg-green-600 cursor-pointer"
+                onClick={submitOrder}
+                onMouseEnter={() => ttsEnabled && speak("Submit Order")}
+              >
+                {loading ? (
+                  <span className="loading loading-spinner loading-md"></span>
+                ) : (
+                  <span>Submit Order</span>
+                )}
               </button>
             </div>
           </div>
