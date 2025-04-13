@@ -19,26 +19,41 @@ const SideMenu: React.FC<SideMenuProps> = ({ currentPage }) => {
                     "menu"
     );
 
-    return (
-        <div className="p-4 space-y-20">
-            <Link to="/" className={`flex flex-col items-center w-full p-2 hover:bg-gray-100 cursor-pointer ${activePage !== 'menu' ? "text-gray-400 " : ""}`}>
-                <RiDrinksLine className="text-2xl" />
-                <p>Menu</p>
-            </Link>
-            <Link to="/inventory" className={`flex flex-col items-center w-full p-2 hover:bg-gray-100 cursor-pointer ${activePage !== 'inventory' ? "text-gray-400" : ""}`}>
-                <LuWarehouse className="text-2xl" />
-                <p >Inventory</p>
-            </Link>
-            <Link to="/reports" className={`flex flex-col items-center w-full p-2 hover:bg-gray-100 cursor-pointer ${activePage !== 'reports' ? "text-gray-400" : ""}`}>
-                <TbBrandGoogleAnalytics className="text-2xl" />
-                <p>Reports</p>
-            </Link>
-            <Link to="/employees" className={`flex flex-col items-center w-full p-2 hover:bg-gray-100 cursor-pointer ${activePage !== "employees" ? " text-gray-400" : ""}`}>
-                <BsPeople className="text-2xl" />
-                <p>Employees</p>
-            </Link>
-        </div>
-    )
+    if(path.includes("customer"))
+    {
+        console.log("Kiosk path detected");
+        return (
+            <div className="p-4 space-y-20">
+                <Link to="/" className={`flex flex-col items-center w-full p-2 hover:bg-gray-100 cursor-pointer ${activePage !== 'menu' ? "text-gray-400 " : ""}`}>
+                    <RiDrinksLine className="text-2xl" />
+                    <p>Menu</p>
+                </Link>
+            </div>
+        )
+    }
+    else
+    {
+        return (
+            <div className="p-4 space-y-20">
+                <Link to="/" className={`flex flex-col items-center w-full p-2 hover:bg-gray-100 cursor-pointer ${activePage !== 'menu' ? "text-gray-400 " : ""}`}>
+                    <RiDrinksLine className="text-2xl" />
+                    <p>Menu</p>
+                </Link>
+                <Link to="/inventory" className={`flex flex-col items-center w-full p-2 hover:bg-gray-100 cursor-pointer ${activePage !== 'inventory' ? "text-gray-400" : ""}`}>
+                    <LuWarehouse className="text-2xl" />
+                    <p >Inventory</p>
+                </Link>
+                <Link to="/reports" className={`flex flex-col items-center w-full p-2 hover:bg-gray-100 cursor-pointer ${activePage !== 'reports' ? "text-gray-400" : ""}`}>
+                    <TbBrandGoogleAnalytics className="text-2xl" />
+                    <p>Reports</p>
+                </Link>
+                <Link to="/employees" className={`flex flex-col items-center w-full p-2 hover:bg-gray-100 cursor-pointer ${activePage !== "employees" ? " text-gray-400" : ""}`}>
+                    <BsPeople className="text-2xl" />
+                    <p>Employees</p>
+                </Link>
+            </div>
+        )
+    }
 }
 
 export default SideMenu;
