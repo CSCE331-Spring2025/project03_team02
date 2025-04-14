@@ -7,11 +7,23 @@ import useAppStore from "../utils/useAppStore";
 import CustomizationModal from "../components/CustomizationModal";
 import MenuItemModal from "../components/MenuItemModal";
 
+
+// Function to speak text using the Web Speech API
+// Uses Browser's speech synthesis to read out the text
+const speak = (text: string) => {
+  if ('speechSynthesis' in window) {
+    const utterance = new SpeechSynthesisUtterance(text);
+    utterance.rate = 1;
+    window.speechSynthesis.cancel();
+    window.speechSynthesis.speak(utterance);
+  }
+};
+
 const MenuPage: React.FC = () => {
   const navigate = useNavigate();
-  
+
   const [loading, setLoading] = useState(false);
-  
+
   const [selectedProduct, setSelectedProduct] = useState<IProduct | null>();
   const [products, setProducts] = useState<IProduct[]>([]);
   const [ingredients, setIngredients] = useState<IIngredient[]>([]);
@@ -20,12 +32,14 @@ const MenuPage: React.FC = () => {
   const [cart, setCart] = useState<IProduct[]>([]);
   const [showSeasonalItems, setShowSeasonalItems] = useState(false);
 
+  const [ttsEnabled, setTtsEnabled] = useState<boolean>(false);
+
   const user = useAppStore(state => state.user);
 
-  const filteredProducts = showSeasonalItems 
-    ? products.filter(product => product.is_seasonal) 
+  const filteredProducts = showSeasonalItems
+    ? products.filter(product => product.is_seasonal)
     : products.filter(product => !product.is_seasonal);
-  
+
   useEffect(() => {
     getProducts();
     getIngredients();
@@ -76,10 +90,10 @@ const MenuPage: React.FC = () => {
   }
 
   const submitOrder = async () => {
-    if(!cart.length) return;
+    if (!cart.length) return;
 
     setLoading(true);
-    
+
     const products = cart.map(elm => elm.id);
 
     const ingredients = []
@@ -92,12 +106,17 @@ const MenuPage: React.FC = () => {
     const total = totals[2]
 
     await axios.post(`${import.meta.env.VITE_API_URL}/submitorder`, { 'products': products, 'ingredients': ingredients, 'employee_id': employee_id, 'total': total });
-    
-    setLoading(false)
-    resetOrder()
+
+    setLoading(false);
+    resetOrder();
+
+    if (ttsEnabled) {
+      speak("Order submitted successfully");
+    }
+
     alert("Order submitted successfully");
   }
-  
+
   const resetOrder = () => {
     const newCart: IProduct[] = [];
     setCart(newCart);
@@ -114,11 +133,7 @@ const MenuPage: React.FC = () => {
     getProducts();
   }
 
-  const toggleSeasonalItems = () => {
-    setShowSeasonalItems(!showSeasonalItems);
-  }
-
-  if(!user || !user.is_manager) {
+  if (!user || !user.is_manager) {
     navigate("/signin");
   }
 
@@ -129,10 +144,11 @@ const MenuPage: React.FC = () => {
           product={selectedProduct}
           ingredients={ingredients}
           onSubmit={addProductToCart}
+          ttsEnabled={ttsEnabled}
         />
       )}
-      
-      <MenuItemModal 
+
+      <MenuItemModal
         ingredients={ingredients}
         onSuccess={handleMenuItemAdded}
       />
@@ -140,31 +156,37 @@ const MenuPage: React.FC = () => {
       <div className='flex gap-8 h-full'>
         <div className='w-2/3 flex flex-col border-r-2 border-gray-100'>
           <div className="flex justify-between items-center mb-4">
-            <div className="flex space-x-4">
-              <button 
+            <div className="flex space-x-4 items-center">
+              <button
                 className={`btn ${!showSeasonalItems ? 'btn-primary' : 'btn-outline'}`}
                 onClick={() => setShowSeasonalItems(false)}
               >
                 Regular Menu
               </button>
-              <button 
+              <button
                 className={`btn ${showSeasonalItems ? 'btn-primary' : 'btn-outline'}`}
                 onClick={() => setShowSeasonalItems(true)}
               >
                 Seasonal Items
               </button>
+              {user && user.is_manager && (
+                <button
+                  className="btn btn-primary rounded-full w-12 h-12 text-2xl font-bold"
+                  onClick={openMenuItemModal}
+                >
+                  +
+                </button>
+              )}
             </div>
-            
-            {user && user.is_manager && (
-              <button 
-                className="btn btn-primary rounded-full w-12 h-12 text-2xl font-bold"
-                onClick={openMenuItemModal}
-              >
-                +
-              </button>
-            )}
+            <button
+              className={`px-4 py-2 rounded-md font-semibold ${ttsEnabled ? 'bg-blue-600 text-white' : 'bg-gray-200 text-black'
+                }`}
+              onClick={() => setTtsEnabled(prev => !prev)}
+            >
+              {ttsEnabled ? 'Disable TTS Mode' : 'Enable TTS Mode'}
+            </button>
           </div>
-          
+
           <div className='flex flex-wrap gap-6 overflow-y-auto'>
             {!products.length && <span className="loading loading-spinner loading-xl mx-auto"></span>}
             {filteredProducts.length === 0 && products.length > 0 && (
@@ -210,29 +232,49 @@ const MenuPage: React.FC = () => {
           </div>
 
           <div className="p-4 space-y-4 border border-gray-100">
-            <div className="flex justify-between">
+            <div
+              className="flex justify-between"
+              onMouseEnter={() => ttsEnabled && speak(`Subtotal: $${totals[0].toFixed(2)}`)}
+            >
               <p>Subtotal</p>
-
               <p>${totals[0].toFixed(2)}</p>
             </div>
 
-            <div className="flex justify-between">
+            <div
+              className="flex justify-between"
+              onMouseEnter={() => ttsEnabled && speak(`Tax: $${totals[1].toFixed(2)}`)}
+            >
               <p>Tax 8.25%</p>
-
               <p>${totals[1].toFixed(2)}</p>
             </div>
 
-            <div className="flex justify-between text-2xl font-bold">
+            <div
+              className="flex justify-between text-2xl font-bold"
+              onMouseEnter={() => ttsEnabled && speak(`Total: $${totals[2].toFixed(2)}`)}
+            >
               <p>Total</p>
-
               <p>${totals[2].toFixed(2)}</p>
             </div>
 
             <div className="flex gap-x-8 my-8">
-              <button className="bg-red-500 text-white p-3 rounded-2xl w-full hover:bg-red-600 cursor-pointer" onClick={resetOrder}>Cancel Order</button>
+              <button
+                className="bg-red-500 text-white p-3 rounded-2xl w-full hover:bg-red-600 cursor-pointer"
+                onClick={resetOrder}
+                onMouseEnter={() => ttsEnabled && speak("Cancel Order")}
+              >
+                Cancel Order
+              </button>
 
-              <button className="bg-green-500 text-white p-3 rounded-2xl w-full hover:bg-green-600 cursor-pointer" onClick={submitOrder}>
-                { loading ? <span className="loading loading-spinner loading-md"></span> : <span>Submit Order</span> }
+              <button
+                className="bg-green-500 text-white p-3 rounded-2xl w-full hover:bg-green-600 cursor-pointer"
+                onClick={submitOrder}
+                onMouseEnter={() => ttsEnabled && speak("Submit Order")}
+              >
+                {loading ? (
+                  <span className="loading loading-spinner loading-md"></span>
+                ) : (
+                  <span>Submit Order</span>
+                )}
               </button>
             </div>
           </div>
