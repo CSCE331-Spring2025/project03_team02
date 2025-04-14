@@ -17,10 +17,6 @@ const Weather: React.FC = () => {
                 (position) => {
                     setLatitude(position.coords.latitude);
                     setLongitude(position.coords.longitude);
-                },
-                (err) => {
-                    setError("Unable to retrieve location");
-                    setLoading(false);
                 }
             );
         } else {
@@ -39,7 +35,7 @@ const Weather: React.FC = () => {
                     setIconUrl(`https://openweathermap.org/img/wn/${response.data.weather[0].icon}@2x.png`);
                     setLoading(false);
                 })
-                .catch((err) => {
+                .catch(() => {
                     setError("Failed to fetch weather data");
                     setLoading(false);
                 });
