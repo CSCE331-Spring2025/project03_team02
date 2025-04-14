@@ -20,7 +20,7 @@ const SideMenu: React.FC<SideMenuProps> = ({ currentPage }) => {
                     path.includes("kitchen") ? "kitchen" : path.includes("customer") ? "customer" : "menu"
     );
 
-    if(activePage == 'customer') {
+    if (activePage == 'customer') {
         return <></>
     }
 
