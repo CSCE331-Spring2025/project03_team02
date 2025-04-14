@@ -39,7 +39,7 @@ class OrderTable(db.Model):
     employeeid = db.Column(UUID(as_uuid=True), db.ForeignKey('employee.id', ondelete='CASCADE'), nullable=False)
     total = db.Column(db.Numeric(10, 2), nullable=False)
     order_date = db.Column(db.DateTime, default=datetime.utcnow)
-
+    completed = db.Column(db.Boolean, default=False, nullable=False)
     product_orders = db.relationship('ProductOrder', backref='order', cascade="all, delete", lazy=True)
 
 
@@ -52,6 +52,7 @@ class Product(db.Model):
     price = db.Column(db.Numeric(10, 2), nullable=False)
     customizations = db.Column(db.Text, nullable=True)
     has_boba = db.Column(db.Boolean, nullable=False, default=False)
+    is_seasonal = db.Column(db.Boolean, nullable=False, default=False)
 
     product_ingredients = db.relationship('ProductIngredient', backref='product', cascade="all, delete", lazy=True)
     product_orders = db.relationship('ProductOrder', backref='product', cascade="all, delete", lazy=True)

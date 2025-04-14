@@ -100,14 +100,18 @@ const InventoryPage: React.FC = () => {
     }
   };
 
-  const addNewItem = async (newItem: any) => {
+  const addNewItem = async (newItem: IProduct) => {
     try {
       const res = tableType === 'Products'
         ? await axios.post(`${import.meta.env.VITE_API_URL}/addproduct`, newItem)
         : await axios.post(`${import.meta.env.VITE_API_URL}/addingredient`, newItem);
       
       if (res.data.success) {
-        tableType === 'Products' ? getProducts() : getIngredients();
+        if(tableType === 'Products') {
+          getProducts()
+        } else {
+          getIngredients();
+        }
         alert(`${tableType === 'Products' ? 'Product' : 'Ingredient'} added successfully`);
       } else {
         alert("Failed to add item");
@@ -126,7 +130,7 @@ const InventoryPage: React.FC = () => {
     setShowModal(false);
   };
 
-  const handleModalSubmit = (newItem: any) => {
+  const handleModalSubmit = (newItem: IProduct) => {
     addNewItem(newItem);
   };
 

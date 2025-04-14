@@ -1,13 +1,23 @@
 import React, { useEffect, useState } from "react";
 import { IIngredient, IProduct } from "../utils/interfaces";
 
+const speak = (text: string) => {
+    if ('speechSynthesis' in window) {
+        window.speechSynthesis.cancel();
+        const utterance = new SpeechSynthesisUtterance(text);
+        utterance.rate = 1;
+        window.speechSynthesis.speak(utterance);
+    }
+};
+
 interface Props {
     product: IProduct
     onSubmit: (product: IProduct) => void
     ingredients: IIngredient[]
+    ttsEnabled: boolean
 }
 
-const CustomizationModal: React.FC<Props> = ({ product, onSubmit, ingredients }) => {
+const CustomizationModal: React.FC<Props> = ({ product, onSubmit, ingredients, ttsEnabled }) => {
     const sizes = [
         { label: "small", price: 0 },
         { label: "medium", price: 1.5 },
@@ -40,11 +50,15 @@ const CustomizationModal: React.FC<Props> = ({ product, onSubmit, ingredients })
     }
 
     useEffect(() => {
-        setSelectedSize("small"); // reset to default if needed
+        setSelectedSize("small");
         setSelectedToppings(ingredients.filter(ing =>
             product?.ingredients?.some(pi => pi.id === ing.id)
-        ))
-    }, [ingredients, product]);
+        ));
+
+        if (ttsEnabled) {
+            speak(`${product.name}. ${product.description}`);
+        }
+    }, [ingredients, product, ttsEnabled]);
 
     return (
         <dialog id="customization-modal" className="modal modal-bottom sm:modal-middle">
@@ -66,6 +80,7 @@ const CustomizationModal: React.FC<Props> = ({ product, onSubmit, ingredients })
                         <button
                             key={size.label}
                             onClick={() => setSelectedSize(size.label)}
+                            onMouseEnter={() => ttsEnabled && speak(`${size.label}, plus $${size.price.toFixed(2)}`)}
                             className={`p-3 rounded-md text-center ${selectedSize === size.label
                                 ? "bg-green-500 text-white"
                                 : "bg-gray-200 text-gray-800 hover:bg-gray-300"
@@ -78,11 +93,12 @@ const CustomizationModal: React.FC<Props> = ({ product, onSubmit, ingredients })
                 </div>
 
                 {/* Toppings */}
-                <div className="grid grid-cols-4 gap-3 mb-6">
+                <div className="flex flex-wrap space-x-2 space-y-2">
                     {ingredients.map((ingredient, index) => (
                         <button
                             key={index}
                             onClick={() => toggleTopping(ingredient)}
+                            onMouseEnter={() => ttsEnabled && speak(ingredient.name)}
                             className={`p-2 rounded-md text-sm text-center ${selectedToppings.includes(ingredient)
                                 ? "bg-green-500 text-white"
                                 : "bg-gray-100 hover:bg-gray-200"
@@ -93,21 +109,32 @@ const CustomizationModal: React.FC<Props> = ({ product, onSubmit, ingredients })
                     ))}
                 </div>
 
+
                 {/* Custom Text Input */}
                 <textarea
                     placeholder="Customizations text input"
                     className="w-full p-3 mb-6 rounded-md bg-gray-100 text-sm"
                     rows={3}
+                    onMouseEnter={() => ttsEnabled && speak("Customization text input")}
+                    onFocus={() => ttsEnabled && speak("Customization text input")}
                 />
 
                 {/* Buttons */}
                 <div className="flex justify-end gap-4">
                     <form method="dialog">
-                        <button className="btn bg-red-500 text-white px-6 py-2 rounded-lg hover:bg-red-600 transition">
+                        <button
+                            className="btn bg-red-500 text-white px-6 py-2 rounded-lg hover:bg-red-600 transition"
+                            onMouseEnter={() => ttsEnabled && speak("Cancel")}
+                        >
                             Cancel
                         </button>
                     </form>
-                    <button className="bg-green-500 text-white px-6 py-2 rounded-lg hover:bg-green-600 transition" onClick={submitCustomizations}>
+
+                    <button
+                        className="bg-green-500 text-white px-6 py-2 rounded-lg hover:bg-green-600 transition"
+                        onClick={submitCustomizations}
+                        onMouseEnter={() => ttsEnabled && speak("Submit")}
+                    >
                         Submit
                     </button>
                 </div>
