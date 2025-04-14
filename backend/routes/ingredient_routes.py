@@ -65,3 +65,43 @@ def update_ingredient_stock():
         return jsonify({'error': 'Something went wrong!'}), 500
 
     return jsonify({ "success": True, 'data': { 'id': ingredient.id, 'name': ingredient.name, 'quantity': ingredient.quantity, 'supplier': ingredient.supplier, 'expiration': ingredient.expiration } })
+
+'''
+ADD ingredient endpoint
+
+This endpoint adds a new ingredient
+'''
+@ingredient_routes_bp.route("/addingredient", methods=['POST'])
+def add_ingredient():
+    try:
+        data = request.get_json()
+
+        id = data.get('id')
+        name = data.get('name')
+        quantity = data.get('stock')
+        supplier = data.get('source')
+        expiration = data.get('expiration')
+
+        if not id or not name or not supplier or quantity is None or not expiration:
+            return jsonify({'error': 'Missing required fields'}), 400
+
+        if not isinstance(quantity, int) or quantity < 0:
+            return jsonify({'error': 'Stock must be a positive number'}), 400
+
+        new_ingredient = Ingredient(
+            id=id,
+            name=name,
+            quantity=quantity,
+            supplier=supplier,
+            expiration=expiration
+        )
+
+        db.session.add(new_ingredient)
+        db.session.commit()
+
+    except Exception as error:
+        db.session.rollback()
+        print(error)
+        return jsonify({'error': 'Something went wrong!'}), 500
+
+    return jsonify({ "success": True, "data": { 'id': new_ingredient.id, 'name': new_ingredient.name, 'quantity': new_ingredient.quantity, 'supplier': new_ingredient.supplier, 'expiration': new_ingredient.expiration } })

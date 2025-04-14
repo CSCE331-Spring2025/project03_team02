@@ -2,13 +2,15 @@ import React from "react";
 
 import ShareteaLogo from "../assets/shartea_logo.png"
 import LanguageTranslation from "./LanguageTranslation";
+import Weather from "./Weather";
 
 const Navbar: React.FC = () => {
     return (
         <div className="w-full flex justify-between items-center px-8 py-4">
             <img src={ShareteaLogo} alt="Sharetea logo" />
 
-            <span className="flex gap-x-2 items-center">
+            <span className="flex gap-x-10 items-center">
+                <Weather />
                 <LanguageTranslation />
             </span>
         </div>

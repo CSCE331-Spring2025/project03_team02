@@ -4,6 +4,8 @@ import axios from "axios";
 import { IIngredient, IProduct } from "../utils/interfaces";
 import useAppStore from "../utils/useAppStore";
 
+import NewItemModal from "../components/NewItemModal";
+
 const InventoryPage: React.FC = () => {
   const navigate = useNavigate();
 
@@ -14,7 +16,9 @@ const InventoryPage: React.FC = () => {
   const [quantityField, setQuantityField] = useState<string>("0");
   const [orderQuantityField, setOrderQuantityField] = useState<string>("10");
 
-  const user = useAppStore((state: any) => state.user);
+  const [showModal, setShowModal] = useState(false); 
+
+  const user = useAppStore(state => state.user);
 
   console.log(user);
 
@@ -96,9 +100,38 @@ const InventoryPage: React.FC = () => {
     }
   };
 
+  const addNewItem = async (newItem: IProduct) => {
+    try {
+      const res = tableType === 'Products'
+        ? await axios.post(`${import.meta.env.VITE_API_URL}/addproduct`, newItem)
+        : await axios.post(`${import.meta.env.VITE_API_URL}/addingredient`, newItem);
+      
+      if (res.data.success) {
+        if(tableType === 'Products') {
+          getProducts()
+        } else {
+          getIngredients();
+        }
+        alert(`${tableType === 'Products' ? 'Product' : 'Ingredient'} added successfully`);
+      } else {
+        alert("Failed to add item");
+      }
+    } catch (error) {
+      console.error("Error while adding item:", error);
+      alert("Error while adding item");
+    }
+  }
+
   const handleAddNewItem = () => {
-    // TODO collect newItemData with modal
-    // addNewItem(tableType, newItemData); 
+    setShowModal(true);
+  };
+
+  const handleCloseModal = () => {
+    setShowModal(false);
+  };
+
+  const handleModalSubmit = (newItem: IProduct) => {
+    addNewItem(newItem);
   };
 
   const handleRowSelect = (item: IIngredient | IProduct) => {
@@ -137,16 +170,22 @@ const InventoryPage: React.FC = () => {
 
   return (
     <div className="flex flex-col h-screen">
+      <NewItemModal
+        showModal={showModal}
+        onClose={handleCloseModal}
+        onSubmit={handleModalSubmit}
+        tableType={tableType}
+      />
       <div className="flex flex-1 overflow-hidden">
         {/* Main Content Area - Scrollable */}
         <div className="flex-1 overflow-y-auto">
           <div className="p-5 space-y-8">
             {/* Inventory Content Section */}
-            <div className="bg-white p-5 rounded shadow">
+            <div className="p-5 rounded shadow">
               <div className="flex items-center mb-4">
                 <label className="mr-2">Select Table:</label>
                 <select
-                  className="border p-1 rounded"
+                  className="border p-1 dark:bg-gray-700 rounded"
                   value={tableType}
                   onChange={(e) => handleTableTypeChange(e.target.value as "Ingredients" | "Products")}
                 >
@@ -163,7 +202,7 @@ const InventoryPage: React.FC = () => {
                     <label className="block mb-1">{tableType === "Products" ? "Current Price:" : "Current Stock:"}</label>
                     <input
                       type="text"
-                      className="border p-2 w-full rounded bg-gray-100"
+                      className="border p-2 w-full rounded"
                       value={quantityField}
                       readOnly
                     />
@@ -194,9 +233,9 @@ const InventoryPage: React.FC = () => {
                 {/* Inventory Table */}
                 <div className="flex-1">
                   <div className="overflow-x-auto">
-                    <table className="min-w-full bg-white border">
+                    <table className="min-w-full border">
                       <thead>
-                        <tr className="bg-gray-100">
+                        <tr className="bg-gray-100 dark:bg-gray-700">
                           <th className="py-2 px-4 border">ID</th>
                           <th className="py-2 px-4 border">{tableType === "Products" ? "Name" : "Ingredient"}</th>
                           {tableType === "Products" ? (
@@ -220,7 +259,7 @@ const InventoryPage: React.FC = () => {
                           products.map((product) => (
                             <tr
                               key={product.id}
-                              className={`hover:bg-gray-50 cursor-pointer ${selectedRow?.id === product.id ? 'bg-blue-100' : ''}`}
+                              className={`hover:bg-gray-50 dark:hover:text-black cursor-pointer ${selectedRow?.id === product.id ? 'bg-blue-100 dark:bg-blue-500' : ''}`}
                               onClick={() => handleRowSelect(product)}
                             >
                               <td className="py-3 px-4 border">{product.id}</td>
@@ -235,14 +274,14 @@ const InventoryPage: React.FC = () => {
                           ingredients.map((ingredient) => (
                             <tr
                               key={ingredient.id}
-                              className={`hover:bg-gray-50 cursor-pointer ${selectedRow?.id === ingredient.id ? 'bg-blue-100' : ''}`}
+                              className={`hover:bg-gray-50 dark:hover:text-black cursor-pointer ${selectedRow?.id === ingredient.id ? 'bg-blue-100 dark:bg-blue-500' : ''}`}
                               onClick={() => handleRowSelect(ingredient)}
                             >
                               <td className="py-3 px-4 border">{ingredient.id}</td>
                               <td className="py-3 px-4 border">{ingredient.name}</td>
                               <td className="py-3 px-4 border">{ingredient.quantity}</td>
                               <td className="py-3 px-4 border">{ingredient.supplier}</td>
-                              <td className="py-3 px-4 border">{ingredient.expiration}</td>
+                              <td className="py-3 px-4 border">{new Date(ingredient.expiration).toLocaleDateString()}</td>
                             </tr>
                           ))
                         )}
@@ -254,12 +293,12 @@ const InventoryPage: React.FC = () => {
             </div>
 
             {/* Restock Report Section */}
-            <div className="bg-white p-5 rounded shadow">
+            <div className="p-5 rounded shadow">
               <h2 className="text-lg font-semibold mb-4">Restock Report:</h2>
               <div className="overflow-x-auto">
-                <table className="min-w-full bg-white border">
+                <table className="min-w-full border">
                   <thead>
-                    <tr className="bg-gray-100">
+                    <tr className="bg-gray-100 dark:bg-gray-700">
                       <th className="py-2 px-4 border">ID</th>
                       <th className="py-2 px-4 border">Ingredient</th>
                       <th className="py-2 px-4 border">Stock</th>
@@ -271,12 +310,12 @@ const InventoryPage: React.FC = () => {
                     {ingredients
                       .filter(ingredient => ingredient.quantity <= 100)
                       .map((ingredient) => (
-                        <tr key={ingredient.id} className="hover:bg-gray-50">
+                        <tr key={ingredient.id} className="hover:bg-gray-50 dark:hover:text-black">
                           <td className="py-3 px-4 border">{ingredient.id}</td>
                           <td className="py-3 px-4 border">{ingredient.name}</td>
                           <td className="py-3 px-4 border">{ingredient.quantity}</td>
                           <td className="py-3 px-4 border">{ingredient.supplier}</td>
-                          <td className="py-3 px-4 border">{ingredient.expiration}</td>
+                          <td className="py-3 px-4 border">{new Date(ingredient.expiration).toLocaleDateString()}</td>
                         </tr>
                       ))}
                   </tbody>
