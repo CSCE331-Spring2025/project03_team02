@@ -1,16 +1,12 @@
 import React, { useState, useEffect } from "react";
-import { useNavigate } from "react-router";
 import axios from "axios";
 import { IIngredient, IProduct } from "../utils/interfaces";
-import useAppStore from "../utils/useAppStore";
 
 import CustomizationModal from "../components/CustomizationModal";
 
 const MenuPage: React.FC = () => {
-  const navigate = useNavigate();
-  
   const [loading, setLoading] = useState(false);
-  
+
   const [selectedProduct, setSelectedProduct] = useState<IProduct | null>();
   const [products, setProducts] = useState<IProduct[]>([]);
   const [ingredients, setIngredients] = useState<IIngredient[]>([]);
@@ -19,8 +15,6 @@ const MenuPage: React.FC = () => {
   const [showFullMenu, setShowFullMenu] = useState(false);
 
   const [cart, setCart] = useState<IProduct[]>([]);
-
-  const user = useAppStore(state => state.user);
 
   useEffect(() => {
     getProducts();
@@ -60,10 +54,10 @@ const MenuPage: React.FC = () => {
   }
 
   const submitOrder = async () => {
-    if(!cart.length) return;
+    if (!cart.length) return;
 
     setLoading(true);
-    
+
     const products = cart.map(elm => elm.id);
 
     const ingredients = []
@@ -76,7 +70,7 @@ const MenuPage: React.FC = () => {
     const total = totals[2]
 
     await axios.post(`${import.meta.env.VITE_API_URL}/submitorder`, { 'products': products, 'ingredients': ingredients, 'employee_id': employee_id, 'total': total });
-    
+
     setLoading(false)
     resetOrder()
     alert("Order submitted successfully");
@@ -100,10 +94,6 @@ const MenuPage: React.FC = () => {
     }
   }, [selectedProduct])
 
-  if(!user || !user.is_manager) {
-    navigate("/signin");
-  }
-
   return (
     <div className='w-full h-full p-4'>
       {products.length > 0 && selectedProduct && (
@@ -116,53 +106,55 @@ const MenuPage: React.FC = () => {
 
       <div className='flex gap-8 h-full'>
         <div className='w-2/3 flex flex-wrap gap-6 border-r-2 border-gray-100'>
-        <div className="flex justify-between items-center mb-4 px-2">
-        <h2 className='text-2xl font-bold'>Popular Drinks</h2>
-        <button 
-              className="bg-black text-white px-4 py-2 rounded-lg hover:bg-gray-800 ml-8"
-              onClick={() => setShowFullMenu(true)}
-            >
-            Full Menu
-        </button>
-        </div>
-        <div className='flex flex-wrap gap-6'>
-          {!products.length && <span className="loading loading-spinner loading-xl mx-auto"></span>}
-          {products.map((product, index) => (
-            <button
-              key={index}
-              className='bg-gray-100 p-4 rounded-xl w-[180px] h-[100px] flex flex-col justify-between shadow-sm hover:bg-gray-200 cursor-pointer'
-              onClick={() => setSelectedProduct(product)}
-            >
-              <p className='text-base font-bold truncate'>{product.name}</p>
-              <p className='text-sm text-gray-700'>${Number(product.price).toFixed(2)}</p>
-            </button>
-          ))}
-        </div>
+          <div className="flex justify-between items-center mb-4 px-2">
+            {products.length !== 0 && <>
+              <h2 className='text-2xl font-bold'>Popular Drinks</h2>
+              <button
+                className="bg-black text-white px-4 py-2 rounded-lg hover:bg-gray-800 ml-8"
+                onClick={() => setShowFullMenu(true)}
+              >
+                Full Menu
+              </button>
+            </>}
+          </div>
+          <div className='flex flex-wrap gap-6'>
+            {!products.length && <span className="loading loading-spinner loading-xl mx-auto"></span>}
+            {products.map((product, index) => (
+              <button
+                key={index}
+                className='bg-gray-100 p-4 rounded-xl w-[180px] h-[100px] flex flex-col justify-between shadow-sm hover:bg-gray-200 cursor-pointer'
+                onClick={() => setSelectedProduct(product)}
+              >
+                <p className='text-base font-bold truncate'>{product.name}</p>
+                <p className='text-sm text-gray-700'>${Number(product.price).toFixed(2)}</p>
+              </button>
+            ))}
+          </div>
         </div>
 
         {/* Full Menu Modal */}
         {showFullMenu && (
-        <dialog open className="modal">
+          <dialog open className="modal">
             <div className="modal-box max-w-3xl">
-            <h3 className="font-bold text-2xl mb-4">Full Menu</h3>
-            
-            <div className="grid grid-cols-2 gap-4">
+              <h3 className="font-bold text-2xl mb-4">Full Menu</h3>
+
+              <div className="grid grid-cols-2 gap-4">
                 {products.map((product, index) => (
-                <div key={index} className="bg-gray-100 p-4 rounded-xl">
+                  <div key={index} className="bg-gray-100 p-4 rounded-xl">
                     <p className="font-bold text-lg">{product.name}</p>
                     <p className="text-gray-700">${Number(product.price).toFixed(2)}</p>
-                </div>
+                  </div>
                 ))}
-            </div>
-            
-            <div className="modal-action">
+              </div>
+
+              <div className="modal-action">
                 <button className="btn" onClick={() => setShowFullMenu(false)}>Close</button>
-            </div>
+              </div>
             </div>
             <form method="dialog" className="modal-backdrop" onClick={() => setShowFullMenu(false)}>
-            <button>close</button>
+              <button>close</button>
             </form>
-        </dialog>
+          </dialog>
         )}
 
         {/* Right: Order Total (1/3) */}
@@ -206,7 +198,7 @@ const MenuPage: React.FC = () => {
               <button className="bg-red-500 text-white p-3 rounded-2xl w-full hover:bg-red-600 cursor-pointer" onClick={resetOrder}>Cancel Order</button>
 
               <button className="bg-green-500 text-white p-3 rounded-2xl w-full hover:bg-green-600 cursor-pointer" onClick={submitOrder}>
-                { loading ? <span className="loading loading-spinner loading-md"></span> : <span>Submit Order</span> }
+                {loading ? <span className="loading loading-spinner loading-md"></span> : <span>Submit Order</span>}
               </button>
             </div>
           </div>
