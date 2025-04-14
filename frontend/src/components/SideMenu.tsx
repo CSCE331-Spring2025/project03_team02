@@ -8,7 +8,7 @@ import { BsPeople } from "react-icons/bs";
 import { TbToolsKitchen2 } from "react-icons/tb";
 
 interface SideMenuProps {
-    currentPage: "menu" | "inventory" | "reports" | "employees" | "kitchen"
+    currentPage: "menu" | "inventory" | "reports" | "employees" | "kitchen" | "customer"
 }
 const SideMenu: React.FC<SideMenuProps> = ({ currentPage }) => {
     const location = useLocation();
@@ -17,8 +17,12 @@ const SideMenu: React.FC<SideMenuProps> = ({ currentPage }) => {
         path.includes("inventory") ? "inventory" :
             path.includes("reports") ? "reports" :
                 path.includes("employees") ? "employees" :
-                    path.includes("kitchen") ? "kitchen" : "menu"
+                    path.includes("kitchen") ? "kitchen" : path.includes("customer") ? "customer" : "menu"
     );
+
+    if (activePage == 'customer') {
+        return <></>
+    }
 
     return (
         <div className="p-4 space-y-20">

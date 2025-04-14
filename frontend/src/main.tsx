@@ -12,6 +12,7 @@ import SalesReport from './pages/SalesReport.tsx';
 import ChartPage from './pages/ChartPage';
 import Reports from './pages/Reports.tsx'
 import SignInPage from './pages/SignIn.tsx';
+import Kiosk from './pages/Kiosk.tsx';
 import KitchenView from './pages/KitchenView.tsx';
 
 const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID
@@ -27,6 +28,7 @@ createRoot(document.getElementById("root")!).render(
           <Route path='/salesreport' element={<SalesReport />} />
           <Route path='/charts' element={<ChartPage />} />
           <Route path='/reports' element={<Reports />} />
+          <Route path='/customer' element={<Kiosk />} />
           <Route path='/kitchen' element={<KitchenView />} />
         </Route>
         <Route path='/signin' element={<SignInPage />} />

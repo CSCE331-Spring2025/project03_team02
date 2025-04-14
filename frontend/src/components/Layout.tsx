@@ -9,7 +9,7 @@ const Layout: React.FC = () => {
     const location = useLocation();
     const path = location.pathname;
     const currentPage = path.includes("inventory") ? "inventory" : 
-                        path.includes("reports") ? "reports" : path.includes('employees') ? 'employees' : path.includes('kitchen') ? 'kitchen' : "menu";
+                        path.includes("reports") ? "reports" : path.includes('employees') ? 'employees' : path.includes('kitchen') ? 'kitchen' :  path.includes('customer') ? 'customer' : "menu";
 
     return (
         <div className="flex flex-col min-h-screen">
