@@ -82,3 +82,47 @@ def update_product_price():
         return jsonify({'error': 'Something went wrong!'}), 500
 
     return jsonify({ "success": True, 'data': { 'id': product.id, 'name': product.name, 'description': product.description, 'price': product.price, 'customizations': product.customizations, 'has_boba': product.has_boba } })
+
+'''
+ADD product endpoint
+
+This endpoint adds a new product to the menu
+'''
+@product_routes_bp.route("/addproduct", methods=['POST'])
+def add_product():
+    try:
+        data = request.get_json()
+
+        id = data.get('id')
+        name = data.get('name')
+        description = data.get('description')
+        price = data.get('price')
+        customizations = data.get('customizations')
+        boba = data.get('boba')
+
+        if not id or not name or not description or price is None:
+            return jsonify({'error': 'Missing required fields'}), 400
+
+        if not isinstance(price, (int, float)) or price < 0:
+            return jsonify({'error': 'Price must be a positive number'}), 400
+
+        has_boba = True if boba == 'Yes' else False
+
+        new_product = Product(
+            id=id,
+            name=name,
+            description=description,
+            price=price,
+            customizations=customizations,
+            has_boba=has_boba
+        )
+
+        db.session.add(new_product)
+        db.session.commit()
+
+    except Exception as error:
+        db.session.rollback()
+        print(error)
+        return jsonify({'error': 'Something went wrong!'}), 500
+
+    return jsonify({ "success": True, "data": { 'id': new_product.id, 'name': new_product.name, 'description': new_product.description, 'price': new_product.price, 'customizations': new_product.customizations, 'boba': new_product.has_boba } })
