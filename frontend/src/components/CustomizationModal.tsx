@@ -14,7 +14,7 @@ interface Props {
     product: IProduct
     onSubmit: (product: IProduct) => void
     ingredients: IIngredient[]
-    ttsEnabled: boolean
+    ttsEnabled?: boolean
 }
 
 const CustomizationModal: React.FC<Props> = ({ product, onSubmit, ingredients, ttsEnabled }) => {

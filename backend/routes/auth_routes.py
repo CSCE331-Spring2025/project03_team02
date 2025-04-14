@@ -53,6 +53,7 @@ def login():
             return jsonify(message="User not authorized"), 401
         
         user_info['is_manager'] = employee.is_manager
+        user_info['id'] = employee.id
 
         # Step 4: Create JWT and return
         jwt_token = create_access_token(identity=email)

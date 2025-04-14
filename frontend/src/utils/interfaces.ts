@@ -42,6 +42,7 @@ export interface IProductOrder {
 }
 
 export interface IUser {
+  id: string
   email: string
   email_verfied: boolean
   family_name: string

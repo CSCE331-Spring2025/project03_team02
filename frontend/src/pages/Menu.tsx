@@ -101,7 +101,7 @@ const MenuPage: React.FC = () => {
       ingredients.push(...elm.ingredients.map(ing => ing.id));
     }
 
-    const employee_id = "550e8400-e29b-41d4-a716-446655440000"
+    const employee_id = user?.id
 
     const total = totals[2]
 

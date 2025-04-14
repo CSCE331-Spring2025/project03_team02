@@ -1,10 +1,13 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
-import { IIngredient, IProduct } from "../utils/interfaces";
+import useAppStore from "../utils/useAppStore";
 
+import { IIngredient, IProduct } from "../utils/interfaces";
 import CustomizationModal from "../components/CustomizationModal";
 
 const MenuPage: React.FC = () => {
+  const user = useAppStore(state => state.user);
+  
   const [loading, setLoading] = useState(false);
 
   const [selectedProduct, setSelectedProduct] = useState<IProduct | null>();
@@ -65,7 +68,7 @@ const MenuPage: React.FC = () => {
       ingredients.push(...elm.ingredients.map(ing => ing.id));
     }
 
-    const employee_id = "550e8400-e29b-41d4-a716-446655440000"
+    const employee_id = user?.id
 
     const total = totals[2]
 
