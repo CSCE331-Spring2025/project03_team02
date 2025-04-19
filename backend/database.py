@@ -19,7 +19,7 @@ class Employee(db.Model):
 class Customer(db.Model):
     __tablename__ = 'customer'
 
-    id = db.Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4, nullable=False)
+    id = db.Column(db.Text, primary_key=True, default=uuid.uuid4, nullable=False)
     name = db.Column(db.String(100), nullable=False)
     email = db.Column(db.String(255), unique=True, nullable=False)
     birthday = db.Column(db.Date, nullable=True)

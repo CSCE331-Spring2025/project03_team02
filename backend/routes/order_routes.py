@@ -1,8 +1,9 @@
+import math
 from flask import Blueprint, jsonify, request
 from datetime import datetime
 import uuid
 
-from database import db, OrderTable, ProductOrder, Ingredient
+from database import Customer, db, OrderTable, ProductOrder, Ingredient
 
 order_routes_bp = Blueprint('order_routes', __name__)
 
@@ -81,17 +82,23 @@ def submit_order():
     products = data.get('products')
     ingredients = data.get('ingredients')
     employee_id = data.get('employee_id')
+    customer_id = data.get('customer')
     total = data.get('total')
     order_date = datetime.now()
 
     try:
         order = OrderTable(id=order_id, employeeid=employee_id, total=total, order_date=order_date)
+        customer = Customer.query.filter_by(id=str(customer_id)).first()
         
+        db.session.add(order)
         db.session.commit()
     except Exception as error:
         db.session.rollback()
         print(error)
         return jsonify({'error': 'Something went wrong!'}), 500
+    
+    if not customer_id:
+        return jsonify({'error': 'Missing or invalid customer ID'}), 400
 
     try:
         for product_id in products:
@@ -100,6 +107,7 @@ def submit_order():
             quantity = 1
 
             product_order = ProductOrder(id=product_order_id, orderid=order_id, productid=product_id, quantity=quantity)
+            customer.points = math.ceil(total)
         db.session.add(product_order)
         db.session.commit()
     except Exception as error:

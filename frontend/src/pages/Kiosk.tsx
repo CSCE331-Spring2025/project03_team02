@@ -4,7 +4,11 @@ import axios from "axios";
 import { IIngredient, IProduct } from "../utils/interfaces";
 import CustomizationModal from "../components/CustomizationModal";
 
+import useAppStore from "../utils/useAppStore";
+
 const MenuPage: React.FC = () => {
+  const customer = useAppStore(state => state.customer);
+  
   const [loading, setLoading] = useState(false);
 
   const [selectedProduct, setSelectedProduct] = useState<IProduct | null>();
@@ -69,7 +73,7 @@ const MenuPage: React.FC = () => {
 
     const total = totals[2]
 
-    await axios.post(`${import.meta.env.VITE_API_URL}/submitorder`, { 'products': products, 'ingredients': ingredients, 'employee_id': employee_id, 'total': total });
+    await axios.post(`${import.meta.env.VITE_API_URL}/submitorder`, { 'products': products, 'ingredients': ingredients, 'employee_id': employee_id, 'total': total, 'customer': customer?.id });
 
     setLoading(false)
     resetOrder()
