@@ -1,10 +1,3 @@
-export interface IEmployee {
-  id: string;
-  name: string;
-  is_manager: boolean;
-  orders?: IOrderTable[]; // optional if not eagerly loaded
-}
-
 export interface IIngredient {
   id: string;
   name: string;
@@ -51,5 +44,12 @@ export interface IUser {
   name: string
   picture: string
   sub: string
+}
+export interface IEmployee extends IUser {
   is_manager: boolean
+}
+
+export interface ICustomer extends IUser {
+  birthday: string,
+  points: number
 }

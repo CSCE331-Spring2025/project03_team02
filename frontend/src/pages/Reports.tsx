@@ -22,7 +22,7 @@ const Reports: React.FC = () => {
   const [startTime, setStartTime] = useState<string>("00:00:00");
   const [endTime, setEndTime] = useState<string>("23:59:59");
 
-  const user = useAppStore(state => state.user);
+  const employee = useAppStore(state => state.employee);
 
   // Utility functions
   const formatCurrency = (value: number) => `$${value.toFixed(2)}`;
@@ -191,7 +191,7 @@ const Reports: React.FC = () => {
     fetchXReport("today");
   }, []);
 
-  if(!user || !user.is_manager) {
+  if(!employee || !employee.is_manager) {
     navigate("/signin");
   }
 

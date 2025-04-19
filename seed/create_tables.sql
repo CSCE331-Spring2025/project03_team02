@@ -56,3 +56,15 @@ CREATE TABLE product_order (
     productid TEXT NOT NULL REFERENCES product(id) ON DELETE CASCADE,
     quantity INT NOT NULL
 );
+
+CREATE TABLE Customer (
+    id SERIAL PRIMARY KEY,
+    name VARCHAR(100) NOT NULL,
+    email VARCHAR(255) UNIQUE NOT NULL,
+    password TEXT NOT NULL,
+    birthday DATE,
+    orders INTEGER DEFAULT 0,
+    points INTEGER DEFAULT 0,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);

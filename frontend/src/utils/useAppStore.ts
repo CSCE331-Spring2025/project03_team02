@@ -1,14 +1,19 @@
 import { create } from "zustand";
-import { IUser } from "./interfaces";
+import { ICustomer, IEmployee } from "./interfaces";
 
 interface AppState {
-    user: IUser | null
-    setUser: (user: IUser | null) => void
+    employee: IEmployee | null
+    customer: ICustomer | null
+    setEmployee: (user: IEmployee | null) => void
+    setCustomer: (customer: ICustomer | null) => void
 }
 
 const useAppStore = create<AppState>()((set) => ({
-    user: null,
-    setUser: (user) => set(() => ({ user }))
+    employee: null,
+    customer: null,
+
+    setEmployee: (employee) => set(() => ({ employee })),
+    setCustomer: (customer) => set(() => ({ customer }))
 }))
 
 export default useAppStore;

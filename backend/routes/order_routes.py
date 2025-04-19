@@ -15,7 +15,7 @@ def get_orders():
         for order in orders:
             products_info = []
             for po in order.product_orders:
-                product = po.product
+                product = po.productdb.session.add(order)
                 ingredients = [
                     {"id": ing.ingredient.id, "name": ing.ingredient.name}
                     for ing in product.product_ingredients
@@ -86,7 +86,7 @@ def submit_order():
 
     try:
         order = OrderTable(id=order_id, employeeid=employee_id, total=total, order_date=order_date)
-        db.session.add(order)
+        
         db.session.commit()
     except Exception as error:
         db.session.rollback()

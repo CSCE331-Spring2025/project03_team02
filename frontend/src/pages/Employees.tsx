@@ -22,7 +22,7 @@ const EmployeesPage: React.FC = () => {
     is_manager: false
   });
 
-  const user = useAppStore(state => state.user);
+  const employee = useAppStore(state => state.employee);
 
   // Get all employees
   const getEmployees = async () => {
@@ -177,7 +177,7 @@ const EmployeesPage: React.FC = () => {
     getEmployees();
   }, []);
 
-  if(!user || !user.is_manager) {
+  if(!employee || !employee.is_manager) {
     navigate("/signin");
   }
 

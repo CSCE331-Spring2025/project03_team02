@@ -16,6 +16,19 @@ class Employee(db.Model):
 
     orders = db.relationship('OrderTable', backref='employee', cascade="all, delete", lazy=True)
 
+class Customer(db.Model):
+    __tablename__ = 'customer'
+
+    id = db.Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4, nullable=False)
+    name = db.Column(db.String(100), nullable=False)
+    email = db.Column(db.String(255), unique=True, nullable=False)
+    birthday = db.Column(db.Date, nullable=True)
+    points = db.Column(db.Integer, default=0)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+    # One-to-many relationship: Customer can have many orders
+    orders = db.relationship('OrderTable', backref='customer', cascade="all, delete", lazy=True)
 
 class Ingredient(db.Model):
     __tablename__ = 'ingredient'
@@ -37,11 +50,15 @@ class OrderTable(db.Model):
 
     id = db.Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4, nullable=False)
     employeeid = db.Column(UUID(as_uuid=True), db.ForeignKey('employee.id', ondelete='CASCADE'), nullable=False)
+
+    # Foreign key to customer table
+    customerid = db.Column(UUID(as_uuid=True), db.ForeignKey('customer.id', ondelete='CASCADE'), nullable=False)
+
     total = db.Column(db.Numeric(10, 2), nullable=False)
     order_date = db.Column(db.DateTime, default=datetime.utcnow)
     completed = db.Column(db.Boolean, default=False, nullable=False)
-    product_orders = db.relationship('ProductOrder', backref='order', cascade="all, delete", lazy=True)
 
+    product_orders = db.relationship('ProductOrder', backref='order', cascade="all, delete", lazy=True)
 
 class Product(db.Model):
     __tablename__ = 'product'

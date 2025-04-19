@@ -10,12 +10,13 @@ const SignInPage: React.FC = () => {
     const navigate = useNavigate();
     const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
-    const setUser = useAppStore(state => state.setUser);
+    const setEmployee = useAppStore(state => state.setEmployee);
+    const setCustomer = useAppStore(state => state.setCustomer);
 
-    async function getUserInfo(codeResponse: CodeResponse) {
+    async function signInEmployee(codeResponse: CodeResponse) {
         try {
             const response = await axios.post(
-                `${import.meta.env.VITE_API_URL}/google_login`,
+                `${import.meta.env.VITE_API_URL}/google_employee_login`,
                 { code: codeResponse.code },
                 {
                     headers: {
@@ -34,14 +35,36 @@ const SignInPage: React.FC = () => {
         }
     }
 
-    const googleLogin = useGoogleLogin({
+    async function signInCustomer(codeResponse: CodeResponse) {
+        try {
+            const response = await axios.post(
+                `${import.meta.env.VITE_API_URL}/google_customer_login`,
+                { code: codeResponse.code },
+                {
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                }
+            );
+
+            return response.data;
+        } catch (error: any) {
+            if (error.response && error.response.data) {
+                throw new Error(error.response.data.message || "Login failed");
+            } else {
+                throw new Error("Login failed");
+            }
+        }
+    }
+
+    const googleEmployeeLogin = useGoogleLogin({
         flow: "auth-code",
         onSuccess: async (codeResponse) => {
             try {
-                const loginDetails = await getUserInfo(codeResponse);
+                const loginDetails = await signInEmployee(codeResponse);
                 if (loginDetails) {
                     // Navigate to the employee view upon successful login.
-                    setUser(loginDetails.user)
+                    setEmployee(loginDetails.user)
                     navigate("/");
                 }
             } catch (err: any) {
@@ -50,10 +73,21 @@ const SignInPage: React.FC = () => {
         },
     });
 
-    // Direct navigation for the customer view (no sign-in required)
-    const handleCustomerView = () => {
-        navigate("/customer");
-    };
+    const googleCustomerLogin = useGoogleLogin({
+        flow: "auth-code",
+        onSuccess: async (codeResponse) => {
+            try {
+                const loginDetails = await signInCustomer(codeResponse);
+                if (loginDetails) {
+                    // Navigate to the employee view upon successful login.
+                    setCustomer(loginDetails.user)
+                    navigate("/customer");
+                }
+            } catch (err: any) {
+                setErrorMessage(err.message);
+            }
+        },
+    });
 
     return (
         <div className="relative min-h-screen flex flex-col justify-center items-center bg-gray-50 px-4">
@@ -95,7 +129,7 @@ const SignInPage: React.FC = () => {
             <div className="flex flex-col space-y-4 w-full max-w-sm">
                 {/* Employee sign in button */}
                 <button
-                    onClick={() => googleLogin()}
+                    onClick={() => googleEmployeeLogin()}
                     className="flex items-center justify-center px-4 py-2 border border-gray-300 rounded-lg shadow-sm hover:shadow-md transition duration-200 bg-white text-gray-700"
                 >
                     <FcGoogle className="mr-2 text-xl" />
@@ -104,10 +138,11 @@ const SignInPage: React.FC = () => {
 
                 {/* Customer view button */}
                 <button
-                    onClick={handleCustomerView}
-                    className="flex items-center justify-center px-4 py-2 border border-gray-300 rounded-lg shadow-sm hover:shadow-md transition duration-200 bg-blue-500 text-white"
+                    onClick={() => googleCustomerLogin()}
+                    className="flex items-center justify-center px-4 py-2 border border-gray-300 rounded-lg shadow-sm hover:shadow-md transition duration-200 bg-white text-gray-700"
                 >
-                    Continue as Customer
+                    <FcGoogle className="mr-2 text-xl" />
+                    Sign in with Google (Customer)
                 </button>
             </div>
         </div>

@@ -34,7 +34,7 @@ const MenuPage: React.FC = () => {
 
   const [ttsEnabled, setTtsEnabled] = useState<boolean>(false);
 
-  const user = useAppStore(state => state.user);
+  const employee = useAppStore(state => state.employee);
 
   const filteredProducts = showSeasonalItems
     ? products.filter(product => product.is_seasonal)
@@ -101,7 +101,7 @@ const MenuPage: React.FC = () => {
       ingredients.push(...elm.ingredients.map(ing => ing.id));
     }
 
-    const employee_id = user?.id
+    const employee_id = employee?.id
 
     const total = totals[2]
 
@@ -133,7 +133,7 @@ const MenuPage: React.FC = () => {
     getProducts();
   }
 
-  if (!user || !user.is_manager) {
+  if (!employee || !employee.is_manager) {
     navigate("/signin");
   }
 
@@ -169,7 +169,7 @@ const MenuPage: React.FC = () => {
               >
                 Seasonal Items
               </button>
-              {user && user.is_manager && (
+              {employee && employee.is_manager && (
                 <button
                   className="btn btn-primary rounded-full w-12 h-12 text-2xl font-bold"
                   onClick={openMenuItemModal}

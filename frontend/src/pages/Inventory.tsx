@@ -18,9 +18,7 @@ const InventoryPage: React.FC = () => {
 
   const [showModal, setShowModal] = useState(false); 
 
-  const user = useAppStore(state => state.user);
-
-  console.log(user);
+  const employee = useAppStore(state => state.employee);
 
   const getProducts = async () => {
     const res = (await axios.get(`${import.meta.env.VITE_API_URL}/getproducts`)).data;
@@ -164,7 +162,7 @@ const InventoryPage: React.FC = () => {
     getIngredients();
   }, [])
 
-  if (!user || !user['is_manager']) {
+  if (!employee || !employee['is_manager']) {
     navigate("/signin")
   }
 
