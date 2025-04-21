@@ -8,13 +8,14 @@ import useAppStore from "../utils/useAppStore";
 
 const MenuPage: React.FC = () => {
   const customer = useAppStore(state => state.customer);
-  
+  const setCustomer = useAppStore(state => state.setCustomer);
+
   const [loading, setLoading] = useState(false);
 
   const [selectedProduct, setSelectedProduct] = useState<IProduct | null>();
   const [products, setProducts] = useState<IProduct[]>([]);
   const [ingredients, setIngredients] = useState<IIngredient[]>([]);
-  const [totals, setTotals] = useState([0, 0, 0]) // subtotal, tax, total
+  const [totals, setTotals] = useState([0, 0, 0, 0]) // subtotal, tax, total, discount
 
   const [showFullMenu, setShowFullMenu] = useState(false);
 
@@ -71,19 +72,39 @@ const MenuPage: React.FC = () => {
 
     const employee_id = "e1b4b9a1-8c59-4d92-bd5f-3f7d8f05e123"
 
-    const total = totals[2]
+    const total = totals[2] - (totals[3] ?? 0)
 
-    await axios.post(`${import.meta.env.VITE_API_URL}/submitorder`, { 'products': products, 'ingredients': ingredients, 'employee_id': employee_id, 'total': total, 'customer': customer?.id });
+    await axios.post(`${import.meta.env.VITE_API_URL}/submitorder`, { 'products': products, 'ingredients': ingredients, 'employee_id': employee_id, 'total': total, 'discount': totals[3] ?? 0, 'customer': customer?.id });
 
     setLoading(false)
     resetOrder()
     alert("Order submitted successfully");
+
+    if (customer && totals[3]) {
+      setCustomer({ ...customer, points: customer.points - Math.floor(totals[3]) * 10 });
+    } else {
+      if (customer) {
+        setCustomer({ ...customer, points: customer.points + Math.ceil(total) });
+      }
+    }
   }
   const resetOrder = () => {
     const newCart: IProduct[] = [];
 
     setCart(newCart);
     updateTotals(newCart)
+  }
+
+  const applyDiscount = () => {
+    if (!customer) return;
+
+    let discount = customer.points / 10;
+    if (discount > totals[2]) {
+      discount = totals[2];
+    }
+
+    const newTotals = [totals[0], totals[1], totals[2], discount];
+    setTotals(newTotals);
   }
 
   useEffect(() => {
@@ -99,7 +120,7 @@ const MenuPage: React.FC = () => {
   }, [selectedProduct])
 
   return (
-    <div className='w-full h-full p-4'>
+    <div className='w-full h-full'>
       {products.length > 0 && selectedProduct && (
         <CustomizationModal
           product={selectedProduct} // Pass the first product or use a selected one
@@ -107,6 +128,38 @@ const MenuPage: React.FC = () => {
           onSubmit={addProductToCart}
         />
       )}
+
+      <dialog id="reward-modal" className="modal">
+        <form method="dialog" className="modal-box max-w-sm">
+          <h3 className="text-2xl font-bold mb-4">Sharetea Rewards</h3>
+
+          <p className="text-gray-700 mb-2">
+            Hello! You have{" "}
+            <span className="font-semibold">
+              ${customer?.points ?? 0}
+            </span>{" "}
+            points.
+          </p>
+
+          <p className="text-gray-700 mb-6">
+            Would you like to apply a{" "}
+            <span className="font-semibold">
+              ${((customer?.points ?? 0) / 10).toFixed(2)}
+            </span>{" "}
+            discount?
+          </p>
+
+          <div className="modal-action justify-end">
+            <button className="btn btn-outline">Cancel</button>
+            <button className="btn btn-primary" onClick={() => applyDiscount()}>Apply Discount</button>
+          </div>
+        </form>
+
+        {/* clicking outside or pressing ESC will also close */}
+        <form method="dialog" className="modal-backdrop">
+          <button aria-label="Close"></button>
+        </form>
+      </dialog>
 
       <div className='flex gap-8 h-full'>
         <div className='w-2/3 flex flex-wrap gap-6 border-r-2 border-gray-100'>
@@ -192,10 +245,18 @@ const MenuPage: React.FC = () => {
               <p>${totals[1].toFixed(2)}</p>
             </div>
 
+            {totals[3] !== undefined && (
+              <div className="flex justify-between">
+                <p>Discount</p>
+
+                <p>${totals[3].toFixed(2)}</p>
+              </div>
+            )}
+
             <div className="flex justify-between text-2xl font-bold">
               <p>Total</p>
 
-              <p>${totals[2].toFixed(2)}</p>
+              <p>${(totals[2] - (totals[3] ?? 0)).toFixed(2)}</p>
             </div>
 
             <div className="flex gap-x-8 my-8">

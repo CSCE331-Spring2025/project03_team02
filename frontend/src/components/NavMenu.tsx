@@ -7,10 +7,10 @@ import { TbBrandGoogleAnalytics } from "react-icons/tb";
 import { BsPeople } from "react-icons/bs";
 import { TbToolsKitchen2 } from "react-icons/tb";
 
-interface SideMenuProps {
+interface NavMenuProps {
     currentPage: "menu" | "inventory" | "reports" | "employees" | "kitchen" | "customer"
 }
-const SideMenu: React.FC<SideMenuProps> = ({ currentPage }) => {
+const NavMenu: React.FC<NavMenuProps> = ({ currentPage }) => {
     const location = useLocation();
     const path = location.pathname;
     const activePage = currentPage || (
@@ -19,10 +19,6 @@ const SideMenu: React.FC<SideMenuProps> = ({ currentPage }) => {
                 path.includes("employees") ? "employees" :
                     path.includes("kitchen") ? "kitchen" : path.includes("customer") ? "customer" : "menu"
     );
-
-    if (activePage == 'customer') {
-        return <></>
-    }
 
     return (
         <div className="p-4 space-y-20">
@@ -50,4 +46,4 @@ const SideMenu: React.FC<SideMenuProps> = ({ currentPage }) => {
     )
 }
 
-export default SideMenu;
+export default NavMenu;

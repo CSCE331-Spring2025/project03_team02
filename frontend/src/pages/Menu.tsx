@@ -35,7 +35,7 @@ const MenuPage: React.FC = () => {
   const [ttsEnabled, setTtsEnabled] = useState<boolean>(false);
 
   const employee = useAppStore(state => state.employee);
-
+  
   const filteredProducts = showSeasonalItems
     ? products.filter(product => product.is_seasonal)
     : products.filter(product => !product.is_seasonal);

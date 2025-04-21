@@ -84,6 +84,7 @@ def submit_order():
     employee_id = data.get('employee_id')
     customer_id = data.get('customer')
     total = data.get('total')
+    discount = data.get('discount')
     order_date = datetime.now()
 
     try:
@@ -107,7 +108,11 @@ def submit_order():
             quantity = 1
 
             product_order = ProductOrder(id=product_order_id, orderid=order_id, productid=product_id, quantity=quantity)
-            customer.points = math.ceil(total)
+            
+            if(discount > 0):
+                customer.points = customer.points - (math.floor(discount) * 10)
+            else:
+                customer.points = customer.points + math.ceil(total)
         db.session.add(product_order)
         db.session.commit()
     except Exception as error:
