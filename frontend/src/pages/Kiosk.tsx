@@ -96,7 +96,7 @@ const MenuPage: React.FC = () => {
   }
 
   const applyDiscount = () => {
-    if (!customer) return;
+    if (!customer || !cart.length) return;
 
     let discount = customer.points / 10;
     if (discount > totals[2]) {
@@ -136,7 +136,7 @@ const MenuPage: React.FC = () => {
           <p className="text-gray-700 mb-2">
             Hello! You have{" "}
             <span className="font-semibold">
-              ${customer?.points ?? 0}
+              {customer?.points ?? 0}
             </span>{" "}
             points.
           </p>
