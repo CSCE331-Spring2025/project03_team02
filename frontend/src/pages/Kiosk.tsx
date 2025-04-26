@@ -5,6 +5,8 @@ import { IIngredient, IProduct } from "../utils/interfaces";
 import CustomizationModal from "../components/CustomizationModal";
 
 import useAppStore from "../utils/useAppStore";
+import { useTranslation } from "../utils/useTranslation";
+import { translationFlags } from "../utils/transaltionFlags";
 
 const MenuPage: React.FC = () => {
   const customer = useAppStore(state => state.customer);
@@ -21,10 +23,44 @@ const MenuPage: React.FC = () => {
 
   const [cart, setCart] = useState<IProduct[]>([]);
 
+  const { t, translateTexts } = useTranslation();
+  const [lang, setLang] = useState("EN");
+
+  const staticTexts = [
+    "Popular Drinks",
+    "Full Menu",
+    "Close",
+    "Subtotal",
+    "Tax 8.25%",
+    "Discount",
+    "Total",
+    "Order #",
+    "Cancel Order",
+    "Submit Order",
+    "Hello! You have",
+    "points.",
+    "Would you like to apply a",
+    "discount?",
+    "Apply Discount",
+    "Cancel",
+    "Order submitted successfully",
+  ];
+
   useEffect(() => {
     getProducts();
     getIngredients();
   }, []);
+
+  useEffect(() => {
+    translateTexts(staticTexts, lang);
+  }, [lang]);
+
+  useEffect(() => {
+    if (products.length > 0) {
+      const names = products.map((p) => p.name);
+      translateTexts(names, lang);
+    }
+  }, [lang, products]);
 
   const getProducts = async () => {
     const res = (await axios.get(`${import.meta.env.VITE_API_URL}/getproducts`)).data;
@@ -78,7 +114,7 @@ const MenuPage: React.FC = () => {
 
     setLoading(false)
     resetOrder()
-    alert("Order submitted successfully");
+    alert(t("Order submitted successfully"))
 
     if (customer && totals[3]) {
       setCustomer({ ...customer, points: customer.points - Math.floor(totals[3]) * 10 });
@@ -88,6 +124,7 @@ const MenuPage: React.FC = () => {
       }
     }
   }
+
   const resetOrder = () => {
     const newCart: IProduct[] = [];
 
@@ -108,11 +145,6 @@ const MenuPage: React.FC = () => {
   }
 
   useEffect(() => {
-    getProducts();
-    getIngredients();
-  }, [])
-
-  useEffect(() => {
     if (products.length > 0) {
       // @ts-expect-error Expect error from accessing DOM directly
       document.getElementById('customization-modal').showModal()
@@ -120,7 +152,60 @@ const MenuPage: React.FC = () => {
   }, [selectedProduct])
 
   return (
-    <div className='w-full h-full'>
+    <div className="w-full h-full">
+    {/* Language Selector with Flag */}
+    <div className="flex justify-end items-center gap-x-4 p-4">
+      <img
+        src={`https://flagcdn.com/w320/${translationFlags[lang.toLowerCase()] || "us"}.png`}
+        alt={`Flag for ${lang}`}
+        className="h-6 w-auto"
+      />
+      <label htmlFor="language-select" className="mr-2 font-semibold">Language:</label>
+        <select
+          id="language-select"
+          value={lang}
+          onChange={(e) => setLang(e.target.value)}
+          className="p-2 border border-gray-300 rounded-md"
+        >
+          {/* Main Languages */}
+          <option value="EN">English</option>
+          <option value="ES">Spanish</option>
+          <option value="FR">French</option>
+          <option value="DE">German</option>
+          <option value="JA">Japanese</option>
+          <option value="ZH">Chinese (Simplified)</option>
+          <option value="KO">Korean</option>
+          <option value="AR">Arabic</option>
+          <option value="HI">Hindi</option>
+          <option value="RU">Russian</option>
+          <option value="PT">Portuguese</option>
+          <option value="IT">Italian</option>
+          <option value="NL">Dutch</option>
+
+          {/* Additional Languages */}
+          <option value="VI">Vietnamese</option>
+          <option value="TA">Tamil</option>
+          <option value="UR">Urdu</option>
+          <option value="FA">Farsi (Persian)</option>
+          <option value="PL">Polish</option>
+          <option value="TR">Turkish</option>
+          <option value="EL">Greek</option>
+          <option value="HE">Hebrew</option>
+          <option value="AM">Amharic</option>
+          <option value="HA">Hausa</option>
+          <option value="TH">Thai</option>
+          <option value="GU">Gujarati</option>
+          <option value="PA">Punjabi</option>
+          <option value="BN">Bengali</option>
+          <option value="RO">Romanian</option>
+          <option value="UK">Ukrainian</option>
+          <option value="SV">Swedish</option>
+          <option value="TL">Tagalog</option>
+          <option value="CMN">Mandarin (Taiwan)</option>
+          <option value="YUE">Cantonese (Hong Kong)</option>
+        </select>
+    </div>
+
       {products.length > 0 && selectedProduct && (
         <CustomizationModal
           product={selectedProduct} // Pass the first product or use a selected one
@@ -134,24 +219,22 @@ const MenuPage: React.FC = () => {
           <h3 className="text-2xl font-bold mb-4">Sharetea Rewards</h3>
 
           <p className="text-gray-700 mb-2">
-            Hello! You have{" "}
-            <span className="font-semibold">
-              {customer?.points ?? 0}
-            </span>{" "}
-            points.
+            {t("Hello! You have")}{" "}
+            <span className="font-semibold">{customer?.points ?? 0}</span>{" "}
+            {t("points.")}
           </p>
 
           <p className="text-gray-700 mb-6">
-            Would you like to apply a{" "}
-            <span className="font-semibold">
-              ${((customer?.points ?? 0) / 10).toFixed(2)}
-            </span>{" "}
-            discount?
+            {t("Would you like to apply a")}{" "}
+            <span className="font-semibold">${((customer?.points ?? 0) / 10).toFixed(2)}</span>{" "}
+            {t("discount?")}
           </p>
 
           <div className="modal-action justify-end">
-            <button className="btn btn-outline">Cancel</button>
-            <button className="btn btn-primary" onClick={() => applyDiscount()}>Apply Discount</button>
+            <button className="btn btn-outline">{t("Cancel")}</button>
+            <button className="btn btn-primary" onClick={() => applyDiscount()}>
+              {t("Apply Discount")}
+            </button>
           </div>
         </form>
 
@@ -161,29 +244,33 @@ const MenuPage: React.FC = () => {
         </form>
       </dialog>
 
-      <div className='flex gap-8 h-full'>
-        <div className='w-2/3 flex flex-wrap gap-6 border-r-2 border-gray-100'>
+      <div className="flex gap-8 h-full">
+        <div className="w-2/3 flex flex-wrap gap-6 border-r-2 border-gray-100">
           <div className="flex justify-between items-center mb-4 px-2">
-            {products.length !== 0 && <>
-              <h2 className='text-2xl font-bold'>Popular Drinks</h2>
-              <button
-                className="bg-black text-white px-4 py-2 rounded-lg hover:bg-gray-800 ml-8"
-                onClick={() => setShowFullMenu(true)}
-              >
-                Full Menu
-              </button>
-            </>}
+            {products.length !== 0 && (
+              <>
+                <h2 className="text-2xl font-bold">{t("Popular Drinks")}</h2>
+                <button
+                  className="bg-black text-white px-4 py-2 rounded-lg hover:bg-gray-800 ml-8"
+                  onClick={() => setShowFullMenu(true)}
+                >
+                  {t("Full Menu")}
+                </button>
+              </>
+            )}
           </div>
-          <div className='flex flex-wrap gap-6'>
-            {!products.length && <span className="loading loading-spinner loading-xl mx-auto"></span>}
+          <div className="flex flex-wrap gap-6">
+            {!products.length && (
+              <span className="loading loading-spinner loading-xl mx-auto"></span>
+            )}
             {products.map((product, index) => (
               <button
                 key={index}
-                className='bg-gray-100 p-4 rounded-xl w-[180px] h-[100px] flex flex-col justify-between shadow-sm hover:bg-gray-200 cursor-pointer'
+                className="bg-gray-100 p-4 rounded-xl w-[180px] h-[100px] flex flex-col justify-between shadow-sm hover:bg-gray-200 cursor-pointer"
                 onClick={() => setSelectedProduct(product)}
               >
-                <p className='text-base font-bold truncate'>{product.name}</p>
-                <p className='text-sm text-gray-700'>${Number(product.price).toFixed(2)}</p>
+                <p className="text-base font-bold truncate">{t(product.name)}</p>
+                <p className="text-sm text-gray-700">${Number(product.price).toFixed(2)}</p>
               </button>
             ))}
           </div>
@@ -193,19 +280,21 @@ const MenuPage: React.FC = () => {
         {showFullMenu && (
           <dialog open className="modal">
             <div className="modal-box max-w-3xl">
-              <h3 className="font-bold text-2xl mb-4">Full Menu</h3>
+              <h3 className="font-bold text-2xl mb-4">{t("Full Menu")}</h3>
 
               <div className="grid grid-cols-2 gap-4">
                 {products.map((product, index) => (
                   <div key={index} className="bg-gray-100 p-4 rounded-xl">
-                    <p className="font-bold text-lg">{product.name}</p>
+                    <p className="font-bold text-lg">{t(product.name)}</p>
                     <p className="text-gray-700">${Number(product.price).toFixed(2)}</p>
                   </div>
                 ))}
               </div>
 
               <div className="modal-action">
-                <button className="btn" onClick={() => setShowFullMenu(false)}>Close</button>
+                <button className="btn" onClick={() => setShowFullMenu(false)}>
+                  {t("Close")}
+                </button>
               </div>
             </div>
             <form method="dialog" className="modal-backdrop" onClick={() => setShowFullMenu(false)}>
@@ -215,9 +304,9 @@ const MenuPage: React.FC = () => {
         )}
 
         {/* Right: Order Total (1/3) */}
-        <div className='w-1/3 p-4 space-y-12'>
+        <div className="w-1/3 p-4 space-y-12">
           <div className="text-3xl font-semibold flex justify-between">
-            <p>Order #</p>
+            <p>{t("Order #")}</p>
             <p>123456</p>
           </div>
 
@@ -225,7 +314,7 @@ const MenuPage: React.FC = () => {
             {cart.map((elm, index) => (
               <div key={index} className="bg-gray-100 p-4 rounded-xl flex justify-between">
                 <div>
-                  <p className="text-xl font-bold">{elm.name}</p>
+                  <p className="text-xl font-bold">{t(elm.name)}</p>
                   <p className="px-2">${elm.price}</p>
                 </div>
               </div>
@@ -234,44 +323,57 @@ const MenuPage: React.FC = () => {
 
           <div className="p-4 space-y-4 border border-gray-100">
             <div className="flex justify-between">
-              <p>Subtotal</p>
+              <p>{t("Subtotal")}</p>
 
               <p>${totals[0].toFixed(2)}</p>
             </div>
 
             <div className="flex justify-between">
-              <p>Tax 8.25%</p>
+              <p>{t("Tax 8.25%")}</p>
 
               <p>${totals[1].toFixed(2)}</p>
             </div>
 
             {totals[3] !== undefined && (
               <div className="flex justify-between">
-                <p>Discount</p>
+                <p>{t("Discount")}</p>
 
                 <p>${totals[3].toFixed(2)}</p>
               </div>
             )}
-
+  
             <div className="flex justify-between text-2xl font-bold">
-              <p>Total</p>
+              <p>{t("Total")}</p>
 
               <p>${(totals[2] - (totals[3] ?? 0)).toFixed(2)}</p>
             </div>
 
             <div className="flex gap-x-8 my-8">
-              <button className="bg-red-500 text-white p-3 rounded-2xl w-full hover:bg-red-600 cursor-pointer" onClick={resetOrder}>Cancel Order</button>
-
-              <button className="bg-green-500 text-white p-3 rounded-2xl w-full hover:bg-green-600 cursor-pointer" onClick={submitOrder}>
-                {loading ? <span className="loading loading-spinner loading-md"></span> : <span>Submit Order</span>}
+              <button
+                className="bg-red-500 text-white p-3 rounded-2xl w-full hover:bg-red-600 cursor-pointer"
+                onClick={resetOrder}
+              >
+                {t("Cancel Order")}
               </button>
+
+              <button
+                className="bg-green-500 text-white p-3 rounded-2xl w-full hover:bg-green-600 cursor-pointer"
+                onClick={submitOrder}
+              >
+                {loading ? (
+                  <span className="loading loading-spinner loading-md"></span>
+                ) : (
+                  <span>{t("Submit Order")}</span>
+                )}
+              </button>
+
             </div>
           </div>
 
         </div>
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default MenuPage
+export default MenuPage;
