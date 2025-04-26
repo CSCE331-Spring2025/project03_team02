@@ -32,6 +32,11 @@ const MenuPage: React.FC = () => {
     setProducts(res.data);
   }
 
+  function getImagePath(imageName: string | null): string {
+    if (!imageName) return '';
+    return `/images/${imageName}.png`;
+  }
+
   const getIngredients = async () => {
     const res = (await axios.get(`${import.meta.env.VITE_API_URL}/getingredients`)).data;
 
@@ -57,6 +62,7 @@ const MenuPage: React.FC = () => {
 
     setTotals([newSubtotal, taxTotal, newTotal])
   }
+
 
   const submitOrder = async () => {
     if (!cart.length) return;
@@ -179,9 +185,16 @@ const MenuPage: React.FC = () => {
             {products.map((product, index) => (
               <button
                 key={index}
-                className='bg-gray-100 p-4 rounded-xl w-[180px] h-[100px] flex flex-col justify-between shadow-sm hover:bg-gray-200 cursor-pointer'
+                className='bg-gray-100 p-4 rounded-xl w-[180px] h-[180px] flex flex-col justify-between shadow-sm hover:bg-gray-200 cursor-pointer'
                 onClick={() => setSelectedProduct(product)}
               >
+                {product.image_url && (
+                  <img 
+                    src={getImagePath(product.image_url)} 
+                    alt={product.name}
+                    className="w-full h-[100px] object-cover rounded-lg mb-2"
+                  />
+                )}
                 <p className='text-base font-bold truncate'>{product.name}</p>
                 <p className='text-sm text-gray-700'>${Number(product.price).toFixed(2)}</p>
               </button>
@@ -196,12 +209,19 @@ const MenuPage: React.FC = () => {
               <h3 className="font-bold text-2xl mb-4">Full Menu</h3>
 
               <div className="grid grid-cols-2 gap-4">
-                {products.map((product, index) => (
-                  <div key={index} className="bg-gray-100 p-4 rounded-xl">
-                    <p className="font-bold text-lg">{product.name}</p>
-                    <p className="text-gray-700">${Number(product.price).toFixed(2)}</p>
-                  </div>
-                ))}
+              {products.map((product, index) => (
+                <div key={index} className="bg-gray-100 p-4 rounded-xl">
+                  {product.image_url && (
+                    <img 
+                      src={getImagePath(product.image_url)} 
+                      alt={product.name}
+                      className="w-full h-[120px] object-cover rounded-lg mb-2"
+                    />
+                  )}
+                  <p className="font-bold text-lg">{product.name}</p>
+                  <p className="text-gray-700">${Number(product.price).toFixed(2)}</p>
+                </div>
+              ))}
               </div>
 
               <div className="modal-action">

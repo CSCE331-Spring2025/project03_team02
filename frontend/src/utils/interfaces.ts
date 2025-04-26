@@ -22,7 +22,8 @@ export interface IProduct {
   customizations?: string | null;
   has_boba: boolean;
   is_seasonal: boolean;
-  ingredients: IIngredient[]
+  ingredients: IIngredient[];
+  image_url?: string;
 }
 
 export interface IProductOrder {

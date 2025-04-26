@@ -71,6 +71,8 @@ class Product(db.Model):
     has_boba = db.Column(db.Boolean, nullable=False, default=False)
     is_seasonal = db.Column(db.Boolean, nullable=False, default=False)
 
+    image_url = db.Column(db.Text)
+
     product_ingredients = db.relationship('ProductIngredient', backref='product', cascade="all, delete", lazy=True)
     product_orders = db.relationship('ProductOrder', backref='product', cascade="all, delete", lazy=True)
 

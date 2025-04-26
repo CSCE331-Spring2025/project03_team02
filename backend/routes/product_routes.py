@@ -46,7 +46,8 @@ def get_products():
                 'customizations': product.customizations,
                 'has_boba': product.has_boba,
                 'is_seasonal': product.is_seasonal,
-                'ingredients': ingredients
+                'ingredients': ingredients,
+                'image_url': product.image_url
             })
 
     except Exception as error:
