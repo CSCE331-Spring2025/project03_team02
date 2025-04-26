@@ -97,9 +97,6 @@ def submit_order():
         db.session.rollback()
         print(error)
         return jsonify({'error': 'Something went wrong!'}), 500
-    
-    if not customer_id:
-        return jsonify({'error': 'Missing or invalid customer ID'}), 400
 
     try:
         for product_id in products:
@@ -109,10 +106,11 @@ def submit_order():
 
             product_order = ProductOrder(id=product_order_id, orderid=order_id, productid=product_id, quantity=quantity)
             
-            if(discount > 0):
-                customer.points = customer.points - (math.floor(discount) * 10)
-            else:
-                customer.points = customer.points + math.ceil(total)
+            if(customer):
+                if(discount > 0):
+                    customer.points = customer.points - (math.floor(discount) * 10)
+                else:
+                    customer.points = customer.points + math.ceil(total)
         db.session.add(product_order)
         db.session.commit()
     except Exception as error:
