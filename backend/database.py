@@ -70,6 +70,7 @@ class Product(db.Model):
     customizations = db.Column(db.Text, nullable=True)
     has_boba = db.Column(db.Boolean, nullable=False, default=False)
     is_seasonal = db.Column(db.Boolean, nullable=False, default=False)
+    alerts = db.Column(db.Text, nullable=True)
 
     image_url = db.Column(db.Text)
 

@@ -24,6 +24,7 @@ export interface IProduct {
   is_seasonal: boolean;
   ingredients: IIngredient[];
   image_url?: string;
+  alerts: string
 }
 
 export interface IProductOrder {
