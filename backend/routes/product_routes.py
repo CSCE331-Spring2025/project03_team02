@@ -112,6 +112,7 @@ def add_menu_item():
         description = data.get('description')
         price = data.get('price')
         customizations = data.get('customizations')
+        alerts = data.get('alerts')
         has_boba = data.get('has_boba', False)
         is_seasonal = data.get('is_seasonal', False)
         ingredient_ids = data.get('ingredient_ids', [])
@@ -130,6 +131,7 @@ def add_menu_item():
             price=price,
             customizations=customizations,
             has_boba=has_boba,
+            alerts=alerts,
             is_seasonal=is_seasonal
         )
 
@@ -194,6 +196,7 @@ def add_product():
         description = data.get('description')
         price = data.get('price')
         customizations = data.get('customizations')
+        alerts = data.get('alerts')
         boba = data.get('boba')
 
         if not id or not name or not description or price is None:
@@ -210,6 +213,7 @@ def add_product():
             description=description,
             price=price,
             customizations=customizations,
+            alerts=alerts,
             has_boba=has_boba
         )
 

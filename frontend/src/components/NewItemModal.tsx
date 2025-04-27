@@ -16,11 +16,12 @@ const NewItemModal: React.FC<Props> = ({ showModal, onClose, onSubmit, tableType
     const [source, setSource] = useState('');
     const [expiration, setExpiration] = useState('');
     const [customizations, setCustomizations] = useState('');
+    const [alerts, setAlert] = useState('');
     const [boba, setBoba] = useState<'Yes' | 'No'>('No');
 
   const handleFormSubmit = () => {
     const newItem = tableType === 'Products'
-      ? { id, name, description, price: parseFloat(price), customizations, boba }
+      ? { id, name, description, price: parseFloat(price), customizations, boba, alerts }
       : { id, name, stock: parseInt(stock), source, expiration };
 
     onSubmit(newItem);
@@ -81,6 +82,15 @@ const NewItemModal: React.FC<Props> = ({ showModal, onClose, onSubmit, tableType
                       className="border p-2 w-full rounded"
                       value={customizations}
                       onChange={(e) => setCustomizations(e.target.value)}
+                    />
+                  </div>
+                  <div className="mb-4">
+                    <label className="block mb-2">Alerts</label>
+                    <input
+                      type="text"
+                      className="border p-2 w-full rounded"
+                      value={alerts}
+                      onChange={(e) => setAlert(e.target.value)}
                     />
                   </div>
                   <div className="mb-4">
