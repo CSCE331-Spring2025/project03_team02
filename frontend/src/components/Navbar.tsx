@@ -11,7 +11,7 @@ const Navbar: React.FC = () => {
 
             <span className="flex gap-x-10 items-center">
                 <Weather />
-                <LanguageTranslation />
+                {/* <LanguageTranslation /> */}
             </span>
         </div>
     )
