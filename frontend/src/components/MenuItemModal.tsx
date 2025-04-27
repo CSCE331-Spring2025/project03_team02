@@ -13,6 +13,7 @@ const MenuItemModal: React.FC<MenuItemModalProps> = ({ ingredients, onSuccess })
   const [price, setPrice] = useState("");
   const [hasBoba, setHasBoba] = useState(false);
   const [customizations, setCustomizations] = useState("");
+  const [alerts, setAlerts] = useState("");
   const [isSeasonal, setIsSeasonal] = useState(false);
   const [selectedIngredients, setSelectedIngredients] = useState<{ id: string; quantity: number }[]>([]);
   const [loading, setLoading] = useState(false);
@@ -53,6 +54,7 @@ const MenuItemModal: React.FC<MenuItemModalProps> = ({ ingredients, onSuccess })
         description,
         price: priceValue,
         customizations: customizations || null,
+        alerts: alerts,
         has_boba: hasBoba,
         is_seasonal: isSeasonal,
         ingredient_ids: selectedIngredients
@@ -144,6 +146,18 @@ const MenuItemModal: React.FC<MenuItemModalProps> = ({ ingredients, onSuccess })
             value={customizations}
             onChange={(e) => setCustomizations(e.target.value)}
             placeholder="Hot/Cold, Size options, etc."
+            rows={2}
+          />
+        </div>
+
+        <div className="form-control mb-4">
+          <label className="label">
+            <span className="label-text">Alerts</span>
+          </label>
+          <textarea
+            className="textarea textarea-bordered"
+            value={alerts}
+            onChange={(e) => setAlerts(e.target.value)}
             rows={2}
           />
         </div>

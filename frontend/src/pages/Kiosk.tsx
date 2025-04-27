@@ -8,6 +8,17 @@ import useAppStore from "../utils/useAppStore";
 import { useTranslation } from "../utils/useTranslation";
 import { translationFlags } from "../utils/transaltionFlags";
 
+// Function to speak text using the Web Speech API
+// Uses Browser's speech synthesis to read out the text
+const speak = (text: string) => {
+  if ('speechSynthesis' in window) {
+    const utterance = new SpeechSynthesisUtterance(text);
+    utterance.rate = 1;
+    window.speechSynthesis.cancel();
+    window.speechSynthesis.speak(utterance);
+  }
+};
+
 const MenuPage: React.FC = () => {
   const customer = useAppStore(state => state.customer);
   const setCustomer = useAppStore(state => state.setCustomer);
@@ -18,6 +29,8 @@ const MenuPage: React.FC = () => {
   const [products, setProducts] = useState<IProduct[]>([]);
   const [ingredients, setIngredients] = useState<IIngredient[]>([]);
   const [totals, setTotals] = useState([0, 0, 0, 0]) // subtotal, tax, total, discount
+
+  const [ttsEnabled, setTtsEnabled] = useState<boolean>(false);
 
   const [showFullMenu, setShowFullMenu] = useState(false);
 
@@ -68,6 +81,11 @@ const MenuPage: React.FC = () => {
     setProducts(res.data);
   }
 
+  function getImagePath(imageName: string | null): string {
+    if (!imageName) return '';
+    return `/images/${imageName}.png`;
+  }
+
   const getIngredients = async () => {
     const res = (await axios.get(`${import.meta.env.VITE_API_URL}/getingredients`)).data;
 
@@ -94,6 +112,7 @@ const MenuPage: React.FC = () => {
     setTotals([newSubtotal, taxTotal, newTotal])
   }
 
+
   const submitOrder = async () => {
     if (!cart.length) return;
 
@@ -115,6 +134,10 @@ const MenuPage: React.FC = () => {
     setLoading(false)
     resetOrder()
     alert(t("Order submitted successfully"))
+
+    if (ttsEnabled) {
+      speak("Order submitted successfully");
+    }
 
     if (customer && totals[3]) {
       setCustomer({ ...customer, points: customer.points - Math.floor(totals[3]) * 10 });
@@ -211,6 +234,8 @@ const MenuPage: React.FC = () => {
           product={selectedProduct} // Pass the first product or use a selected one
           ingredients={ingredients}
           onSubmit={addProductToCart}
+          ttsEnabled={ttsEnabled}
+          customer={customer}
         />
       )}
 
@@ -259,6 +284,13 @@ const MenuPage: React.FC = () => {
               </>
             )}
           </div>
+          <button
+              className={`px-4 py-2 rounded-md font-semibold ${ttsEnabled ? 'bg-blue-600 text-white' : 'bg-gray-200 text-black'
+                }`}
+              onClick={() => setTtsEnabled(prev => !prev)}
+            >
+              {ttsEnabled ? 'Disable TTS Mode' : 'Enable TTS Mode'}
+            </button>
           <div className="flex flex-wrap gap-6">
             {!products.length && (
               <span className="loading loading-spinner loading-xl mx-auto"></span>
@@ -266,11 +298,18 @@ const MenuPage: React.FC = () => {
             {products.map((product, index) => (
               <button
                 key={index}
-                className="bg-gray-100 p-4 rounded-xl w-[180px] h-[100px] flex flex-col justify-between shadow-sm hover:bg-gray-200 cursor-pointer"
+                className='bg-gray-100 p-4 rounded-xl w-[180px] h-[180px] flex flex-col justify-between shadow-sm hover:bg-gray-200 cursor-pointer'
                 onClick={() => setSelectedProduct(product)}
               >
-                <p className="text-base font-bold truncate">{t(product.name)}</p>
-                <p className="text-sm text-gray-700">${Number(product.price).toFixed(2)}</p>
+                {product.image_url && (
+                  <img 
+                    src={getImagePath(product.image_url)} 
+                    alt={product.name}
+                    className="w-full h-[100px] object-cover rounded-lg mb-2"
+                  />
+                )}
+                <p className='text-base font-bold truncate'>{t(product.name)}</p>
+                <p className='text-sm text-gray-700'>${Number(product.price).toFixed(2)}</p>
               </button>
             ))}
           </div>
@@ -283,12 +322,19 @@ const MenuPage: React.FC = () => {
               <h3 className="font-bold text-2xl mb-4">{t("Full Menu")}</h3>
 
               <div className="grid grid-cols-2 gap-4">
-                {products.map((product, index) => (
-                  <div key={index} className="bg-gray-100 p-4 rounded-xl">
-                    <p className="font-bold text-lg">{t(product.name)}</p>
-                    <p className="text-gray-700">${Number(product.price).toFixed(2)}</p>
-                  </div>
-                ))}
+              {products.map((product, index) => (
+                <div key={index} className="bg-gray-100 p-4 rounded-xl">
+                  {product.image_url && (
+                    <img 
+                      src={getImagePath(product.image_url)} 
+                      alt={product.name}
+                      className="w-full h-[120px] object-cover rounded-lg mb-2"
+                    />
+                  )}
+                  <p className="font-bold text-lg">{t(product.name)}</p>
+                  <p className="text-gray-700">${Number(product.price).toFixed(2)}</p>
+                </div>
+              ))}
               </div>
 
               <div className="modal-action">
@@ -312,7 +358,9 @@ const MenuPage: React.FC = () => {
 
           <div className="space-y-4">
             {cart.map((elm, index) => (
-              <div key={index} className="bg-gray-100 p-4 rounded-xl flex justify-between">
+              <div key={index} className="bg-gray-100 p-4 rounded-xl flex justify-between"
+              onMouseEnter={() => ttsEnabled && speak(elm.name)}
+              >
                 <div>
                   <p className="text-xl font-bold">{t(elm.name)}</p>
                   <p className="px-2">${elm.price}</p>
@@ -323,13 +371,17 @@ const MenuPage: React.FC = () => {
 
           <div className="p-4 space-y-4 border border-gray-100">
             <div className="flex justify-between">
-              <p>{t("Subtotal")}</p>
+              <p
+                onMouseEnter={() => ttsEnabled && speak(`Subtotal: $${totals[0].toFixed(2)}`)}
+              >{t("Subtotal")}</p>
 
               <p>${totals[0].toFixed(2)}</p>
             </div>
 
             <div className="flex justify-between">
-              <p>{t("Tax 8.25%")}</p>
+              <p
+              onMouseEnter={() => ttsEnabled && speak(`Tax: $${totals[1].toFixed(2)}`)}
+              >{t("Tax 8.25%")}</p>
 
               <p>${totals[1].toFixed(2)}</p>
             </div>
@@ -342,7 +394,9 @@ const MenuPage: React.FC = () => {
               </div>
             )}
   
-            <div className="flex justify-between text-2xl font-bold">
+            <div className="flex justify-between text-2xl font-bold"
+              onMouseEnter={() => ttsEnabled && speak(`Total: $${totals[2].toFixed(2)}`)}
+            >
               <p>{t("Total")}</p>
 
               <p>${(totals[2] - (totals[3] ?? 0)).toFixed(2)}</p>
@@ -352,6 +406,7 @@ const MenuPage: React.FC = () => {
               <button
                 className="bg-red-500 text-white p-3 rounded-2xl w-full hover:bg-red-600 cursor-pointer"
                 onClick={resetOrder}
+                onMouseEnter={() => ttsEnabled && speak("Cancel Order")}
               >
                 {t("Cancel Order")}
               </button>
@@ -359,6 +414,7 @@ const MenuPage: React.FC = () => {
               <button
                 className="bg-green-500 text-white p-3 rounded-2xl w-full hover:bg-green-600 cursor-pointer"
                 onClick={submitOrder}
+                onMouseEnter={() => ttsEnabled && speak("Submit Order")}
               >
                 {loading ? (
                   <span className="loading loading-spinner loading-md"></span>
