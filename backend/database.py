@@ -30,6 +30,8 @@ class Customer(db.Model):
     # One-to-many relationship: Customer can have many orders
     orders = db.relationship('OrderTable', backref='customer', cascade="all, delete", lazy=True)
 
+    product_reviews = db.relationship('ProductReview', backref='customer', cascade="all, delete", lazy=True)
+
 class Ingredient(db.Model):
     __tablename__ = 'ingredient'
     __table_args__ = (
@@ -77,6 +79,8 @@ class Product(db.Model):
     product_ingredients = db.relationship('ProductIngredient', backref='product', cascade="all, delete", lazy=True)
     product_orders = db.relationship('ProductOrder', backref='product', cascade="all, delete", lazy=True)
 
+    product_reviews = db.relationship('ProductReview', backref='product', cascade="all, delete", lazy=True)
+
 
 class ProductIngredient(db.Model):
     __tablename__ = 'product_ingredient'
@@ -95,3 +99,14 @@ class ProductOrder(db.Model):
     orderid = db.Column(UUID(as_uuid=True), db.ForeignKey('ordertable.id', ondelete='CASCADE'), nullable=False)
     productid = db.Column(UUID(as_uuid=True), db.ForeignKey('product.id', ondelete='CASCADE'), nullable=False)
     quantity = db.Column(db.Integer, nullable=False)
+
+class ProductReview(db.Model):
+    __tablename__ = 'product_review'
+
+    id = db.Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4, nullable=False)
+    
+    product_id = db.Column(UUID(as_uuid=True), db.ForeignKey('product.id', ondelete='CASCADE'), nullable=False)
+    customer_id = db.Column(db.Text, db.ForeignKey('customer.id', ondelete='CASCADE'), nullable=False)
+    
+    review_text = db.Column(db.Text, nullable=False)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)

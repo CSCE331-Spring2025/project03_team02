@@ -10,7 +10,6 @@ GET products endpoint
 This endpoint gets all of the menu items avaliable for sale
 '''
 
-
 @product_routes_bp.route("/getproducts", methods=['GET'])
 def get_products():
     products = []
@@ -19,11 +18,13 @@ def get_products():
         product_result = Product.query.all()
         ingredient_result = Ingredient.query.all()
         ingredient_map = {
-            str(ingredient.id): ingredient for ingredient in ingredient_result}
+            str(ingredient.id): ingredient for ingredient in ingredient_result
+        }
 
         for product in product_result:
             ingredients = []
 
+            # Get Ingredients
             for pi in product.product_ingredients:
                 ingredient = ingredient_map.get(str(pi.ingredientid))
                 if ingredient is None:
@@ -38,6 +39,17 @@ def get_products():
                 }
                 ingredients.append(ingredient_data)
 
+            # NEW: Get Reviews
+            reviews = []
+            for review in product.product_reviews:
+                review_data = {
+                    'id': str(review.id),
+                    'customer_id': review.customer_id,
+                    'review_text': review.review_text,
+                    'created_at': review.created_at.isoformat() if review.created_at else None
+                }
+                reviews.append(review_data)
+
             products.append({
                 'id': str(product.id),
                 'name': product.name,
@@ -48,7 +60,8 @@ def get_products():
                 'is_seasonal': product.is_seasonal,
                 'ingredients': ingredients,
                 'image_url': product.image_url,
-                'alerts': product.alerts
+                'alerts': product.alerts,
+                'reviews': reviews
             })
 
     except Exception as error:
@@ -56,8 +69,6 @@ def get_products():
         return jsonify({'error': 'Something went wrong!'}), 500
 
     return jsonify({'data': products})
-
-
 '''
 UPDATE product SET price endpoint
 
@@ -178,6 +189,7 @@ def add_menu_item():
         db.session.rollback()
         print(error)
         return jsonify({'error': 'Something went wrong!'}), 500
+
 
 '''
 ADD product endpoint

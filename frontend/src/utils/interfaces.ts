@@ -6,6 +6,13 @@ export interface IIngredient {
   expiration: string; // ISO Date string
 }
 
+export interface IReview {
+  id: string;
+  customer_id: string;
+  review_text: string;
+  created_at: string | null;
+}
+
 export interface IOrderTable {
   id: string;
   employeeid: string;
@@ -25,6 +32,7 @@ export interface IProduct {
   ingredients: IIngredient[];
   image_url?: string;
   alerts: string
+  reviews: IReview[]
 }
 
 export interface IProductOrder {

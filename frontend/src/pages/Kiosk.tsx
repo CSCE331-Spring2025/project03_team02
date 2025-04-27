@@ -77,7 +77,7 @@ const MenuPage: React.FC = () => {
 
   const getProducts = async () => {
     const res = (await axios.get(`${import.meta.env.VITE_API_URL}/getproducts`)).data;
-    
+
     setProducts(res.data);
   }
 
@@ -235,6 +235,7 @@ const MenuPage: React.FC = () => {
           ingredients={ingredients}
           onSubmit={addProductToCart}
           ttsEnabled={ttsEnabled}
+          customer={customer}
         />
       )}
 

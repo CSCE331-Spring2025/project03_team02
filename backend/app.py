@@ -14,6 +14,7 @@ from routes.sales_report_routes import sales_report_routes_bp
 from routes.charts_routes import charts_routes_bp
 from routes.auth_routes import auth_routes_bp
 from routes.translation_routes import translation_routes_bp
+from routes.review_routes import review_routes_bp
 
 load_dotenv()
 
@@ -42,7 +43,7 @@ with app.app_context():
     app.register_blueprint(charts_routes_bp)
     app.register_blueprint(auth_routes_bp)
     app.register_blueprint(translation_routes_bp)
-
+    app.register_blueprint(review_routes_bp)
 
 @app.route('/')
 def home():
