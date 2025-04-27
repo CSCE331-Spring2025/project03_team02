@@ -8,6 +8,17 @@ import useAppStore from "../utils/useAppStore";
 import { useTranslation } from "../utils/useTranslation";
 import { translationFlags } from "../utils/transaltionFlags";
 
+// Function to speak text using the Web Speech API
+// Uses Browser's speech synthesis to read out the text
+const speak = (text: string) => {
+  if ('speechSynthesis' in window) {
+    const utterance = new SpeechSynthesisUtterance(text);
+    utterance.rate = 1;
+    window.speechSynthesis.cancel();
+    window.speechSynthesis.speak(utterance);
+  }
+};
+
 const MenuPage: React.FC = () => {
   const customer = useAppStore(state => state.customer);
   const setCustomer = useAppStore(state => state.setCustomer);
@@ -18,6 +29,8 @@ const MenuPage: React.FC = () => {
   const [products, setProducts] = useState<IProduct[]>([]);
   const [ingredients, setIngredients] = useState<IIngredient[]>([]);
   const [totals, setTotals] = useState([0, 0, 0, 0]) // subtotal, tax, total, discount
+
+  const [ttsEnabled, setTtsEnabled] = useState<boolean>(false);
 
   const [showFullMenu, setShowFullMenu] = useState(false);
 
@@ -122,6 +135,10 @@ const MenuPage: React.FC = () => {
     resetOrder()
     alert(t("Order submitted successfully"))
 
+    if (ttsEnabled) {
+      speak("Order submitted successfully");
+    }
+
     if (customer && totals[3]) {
       setCustomer({ ...customer, points: customer.points - Math.floor(totals[3]) * 10 });
     } else {
@@ -217,6 +234,7 @@ const MenuPage: React.FC = () => {
           product={selectedProduct} // Pass the first product or use a selected one
           ingredients={ingredients}
           onSubmit={addProductToCart}
+          ttsEnabled={ttsEnabled}
         />
       )}
 
@@ -265,6 +283,13 @@ const MenuPage: React.FC = () => {
               </>
             )}
           </div>
+          <button
+              className={`px-4 py-2 rounded-md font-semibold ${ttsEnabled ? 'bg-blue-600 text-white' : 'bg-gray-200 text-black'
+                }`}
+              onClick={() => setTtsEnabled(prev => !prev)}
+            >
+              {ttsEnabled ? 'Disable TTS Mode' : 'Enable TTS Mode'}
+            </button>
           <div className="flex flex-wrap gap-6">
             {!products.length && (
               <span className="loading loading-spinner loading-xl mx-auto"></span>
@@ -332,7 +357,9 @@ const MenuPage: React.FC = () => {
 
           <div className="space-y-4">
             {cart.map((elm, index) => (
-              <div key={index} className="bg-gray-100 p-4 rounded-xl flex justify-between">
+              <div key={index} className="bg-gray-100 p-4 rounded-xl flex justify-between"
+              onMouseEnter={() => ttsEnabled && speak(elm.name)}
+              >
                 <div>
                   <p className="text-xl font-bold">{t(elm.name)}</p>
                   <p className="px-2">${elm.price}</p>
@@ -343,13 +370,17 @@ const MenuPage: React.FC = () => {
 
           <div className="p-4 space-y-4 border border-gray-100">
             <div className="flex justify-between">
-              <p>{t("Subtotal")}</p>
+              <p
+                onMouseEnter={() => ttsEnabled && speak(`Subtotal: $${totals[0].toFixed(2)}`)}
+              >{t("Subtotal")}</p>
 
               <p>${totals[0].toFixed(2)}</p>
             </div>
 
             <div className="flex justify-between">
-              <p>{t("Tax 8.25%")}</p>
+              <p
+              onMouseEnter={() => ttsEnabled && speak(`Tax: $${totals[1].toFixed(2)}`)}
+              >{t("Tax 8.25%")}</p>
 
               <p>${totals[1].toFixed(2)}</p>
             </div>
@@ -362,7 +393,9 @@ const MenuPage: React.FC = () => {
               </div>
             )}
   
-            <div className="flex justify-between text-2xl font-bold">
+            <div className="flex justify-between text-2xl font-bold"
+              onMouseEnter={() => ttsEnabled && speak(`Total: $${totals[2].toFixed(2)}`)}
+            >
               <p>{t("Total")}</p>
 
               <p>${(totals[2] - (totals[3] ?? 0)).toFixed(2)}</p>
@@ -372,6 +405,7 @@ const MenuPage: React.FC = () => {
               <button
                 className="bg-red-500 text-white p-3 rounded-2xl w-full hover:bg-red-600 cursor-pointer"
                 onClick={resetOrder}
+                onMouseEnter={() => ttsEnabled && speak("Cancel Order")}
               >
                 {t("Cancel Order")}
               </button>
@@ -379,6 +413,7 @@ const MenuPage: React.FC = () => {
               <button
                 className="bg-green-500 text-white p-3 rounded-2xl w-full hover:bg-green-600 cursor-pointer"
                 onClick={submitOrder}
+                onMouseEnter={() => ttsEnabled && speak("Submit Order")}
               >
                 {loading ? (
                   <span className="loading loading-spinner loading-md"></span>
