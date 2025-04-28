@@ -1,7 +1,6 @@
 import React from "react";
 
 import ShareteaLogo from "../assets/shartea_logo.png"
-import LanguageTranslation from "./LanguageTranslation";
 import Weather from "./Weather";
 
 const Navbar: React.FC = () => {
