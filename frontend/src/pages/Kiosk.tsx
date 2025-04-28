@@ -278,23 +278,36 @@ const MenuPage: React.FC = () => {
           <div className="flex justify-between items-center mb-4 px-2">
             {products.length !== 0 && (
               <>
-                <h2 className="text-2xl font-bold">{t("Popular Drinks")}</h2>
-                <button
-                  className="bg-black text-white px-4 py-2 rounded-lg hover:bg-gray-800 ml-8"
-                  onClick={() => setShowFullMenu(true)}
-                >
-                  {t("Full Menu")}
-                </button>
+                <h2
+  className="text-2xl font-bold"
+  onMouseEnter={() => ttsEnabled && speak(t("Popular Drinks"))}
+>
+  {t("Popular Drinks")}
+</h2>
+<button
+  className="bg-black text-white px-4 py-2 rounded-lg hover:bg-gray-800 ml-8"
+  onClick={() => setShowFullMenu(true)}
+  onMouseEnter={() => ttsEnabled && speak(t("Full Menu"))}
+>
+  {t("Full Menu")}
+</button>
               </>
             )}
           </div>
           <button
-              className={`px-4 py-2 rounded-md font-semibold ${ttsEnabled ? 'bg-blue-600 text-white' : 'bg-gray-200 text-black'
-                }`}
-              onClick={() => setTtsEnabled(prev => !prev)}
-            >
-              {ttsEnabled ? 'Disable TTS Mode' : 'Enable TTS Mode'}
-            </button>
+  className={`px-4 py-2 rounded-md font-semibold ${
+    ttsEnabled ? 'bg-blue-600 text-white' : 'bg-gray-200 text-black'
+  }`}
+  onClick={() => setTtsEnabled(prev => !prev)}
+  onMouseEnter={() =>
+    ttsEnabled
+      ? speak("Disable Text to Speech Mode")
+      : speak("Enable Text to Speech Mode")
+  }
+>
+  {ttsEnabled ? 'Disable TTS Mode' : 'Enable TTS Mode'}
+</button>
+
           <div className="flex flex-wrap gap-6">
             {!products.length && (
               <span className="loading loading-spinner loading-xl mx-auto"></span>
@@ -304,6 +317,7 @@ const MenuPage: React.FC = () => {
                 key={index}
                 className='bg-gray-100 p-4 rounded-xl w-[180px] h-[180px] flex flex-col justify-between shadow-sm hover:bg-gray-200 cursor-pointer'
                 onClick={() => setSelectedProduct(product)}
+                onMouseEnter={() => ttsEnabled && speak(`${t(product.name)}, $${product.price.toFixed(2)}`)}
               >
                 {product.image_url && (
                   <img 
@@ -327,7 +341,11 @@ const MenuPage: React.FC = () => {
 
               <div className="grid grid-cols-2 gap-4">
               {products.map((product, index) => (
-                <div key={index} className="bg-gray-100 p-4 rounded-xl">
+                <div
+                  key={index}
+                  className="bg-gray-100 p-4 rounded-xl"
+                  onMouseEnter={() => ttsEnabled && speak(`${t(product.name)}, $${product.price.toFixed(2)}`)}
+                >
                   {product.image_url && (
                     <img 
                       src={getImagePath(product.image_url)} 
@@ -335,6 +353,7 @@ const MenuPage: React.FC = () => {
                       className="w-full h-[120px] object-cover rounded-lg mb-2"
                     />
                   )}
+                  
                   <p className="font-bold text-lg">{t(product.name)}</p>
                   <p className="text-gray-700">${Number(product.price).toFixed(2)}</p>
                 </div>

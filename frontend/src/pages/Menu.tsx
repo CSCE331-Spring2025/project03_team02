@@ -173,12 +173,14 @@ const MenuPage: React.FC = () => {
               <button
                 className={`btn ${!showSeasonalItems ? 'btn-primary' : 'btn-outline'}`}
                 onClick={() => setShowSeasonalItems(false)}
+                onMouseEnter={() => ttsEnabled && speak("Regular Menu")}
               >
                 Regular Menu
               </button>
               <button
                 className={`btn ${showSeasonalItems ? 'btn-primary' : 'btn-outline'}`}
                 onClick={() => setShowSeasonalItems(true)}
+                onMouseEnter={() => ttsEnabled && speak("Seasonal Items")}
               >
                 Seasonal Items
               </button>
@@ -186,6 +188,7 @@ const MenuPage: React.FC = () => {
                 <button
                   className="btn btn-primary rounded-full w-12 h-12 text-2xl font-bold"
                   onClick={openMenuItemModal}
+                  onMouseEnter={() => ttsEnabled && speak("Add new menu item")}
                 >
                   +
                 </button>
@@ -212,6 +215,7 @@ const MenuPage: React.FC = () => {
                 key={index}
                 className={`${product.is_seasonal ? 'bg-amber-100' : 'bg-gray-100'} p-4 rounded-xl w-[180px] h-[100px] flex flex-col justify-between shadow-sm hover:bg-gray-200 cursor-pointer`}
                 onClick={() => setSelectedProduct(product)}
+                onMouseEnter={() => ttsEnabled && speak(`${product.name}, $${product.price.toFixed(2)}`)}
               >
                 <p className='text-base font-bold truncate'>{product.name}</p>
                 <p className='text-sm text-gray-700'>${Number(product.price).toFixed(2)}</p>
