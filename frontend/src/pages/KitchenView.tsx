@@ -22,6 +22,7 @@ const KitchenView: React.FC = () => {
   // fetch incomplete orders from the api
   const fetchOrders = async () => {
     const res = await axios.get(`${import.meta.env.VITE_API_URL}/getorders`);
+    console.log(res.data.orders);
     setOrders(res.data.orders);
   };
 

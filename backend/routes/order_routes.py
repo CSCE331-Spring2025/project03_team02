@@ -105,43 +105,38 @@ def submit_order():
         return jsonify({'error': 'Something went wrong!'}), 500
 
     try:
-        # create product order records and update customer points
         for product_id in products:
             product_order_id = uuid.uuid4()
-            order_id = order.id
-            quantity = 1
-
-            product_order = ProductOrder(id=product_order_id, orderid=order_id, productid=product_id, quantity=quantity)
-            
-            if(customer):
-                if(discount > 0):
-                    if(customer.points * 0.1 <= total):
-                        customer.points = 0
-                    else:
-                        customer.points = customer.points - (math.floor(discount) * 10)
+            product_order = ProductOrder(id=product_order_id, orderid=order.id, productid=product_id, quantity=1)
+            db.session.add(product_order)
+        if customer:
+            if discount > 0:
+                if customer.points * 0.1 <= total:
+                    customer.points = 0
                 else:
-                    customer.points = customer.points + math.ceil(total)
-        db.session.add(product_order)
+                    customer.points -= math.floor(discount) * 10
+            else:
+                customer.points += math.ceil(total)
+
         db.session.commit()
     except Exception as error:
         db.session.rollback()
         print(error)
         return jsonify({'error': 'Something went wrong!'}), 500
+
     
     try:
-        # update ingredient quantities
         for ingredient_id in ingredients:
             db_ingredient = Ingredient.query.filter_by(id=ingredient_id).first()
-
-            if(db_ingredient.quantity <= 0):
+            if db_ingredient.quantity <= 0:
                 raise Exception("Invalid Ingredient Quantity")
-            
-            db_ingredient.quantity = db_ingredient.quantity - 1
-        db.session.add(product_order)
+            db_ingredient.quantity -= 1
+
         db.session.commit()
     except Exception as error:
         db.session.rollback()
         print(error)
         return jsonify({'error': 'Something went wrong!'}), 500
+
     
     return jsonify({ 'data': { 'id': order.id, 'employee_id': order.employeeid, 'total': order.total, 'order_date': order.order_date } })
