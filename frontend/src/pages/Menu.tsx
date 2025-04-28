@@ -40,7 +40,7 @@ const MenuPage: React.FC = () => {
   // filter products based on seasonal status
   const filteredProducts = showSeasonalItems
     ? products.filter(product => product.is_seasonal)
-    : products.filter(product => !product.is_seasonal);
+    : products; // Show all products in regular menu
 
   // fetch menu items and ingredients on component mount
   useEffect(() => {
