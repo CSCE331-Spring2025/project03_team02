@@ -8,18 +8,20 @@ import useAppStore from "../utils/useAppStore";
 import { useTranslation } from "../utils/useTranslation";
 import { translationFlags } from "../utils/transaltionFlags";
 
-// Function to speak text using the Web Speech API
-// Uses Browser's speech synthesis to read out the text
-const speak = (text: string) => {
-  if ('speechSynthesis' in window) {
-    const utterance = new SpeechSynthesisUtterance(text);
-    utterance.rate = 1;
-    window.speechSynthesis.cancel();
-    window.speechSynthesis.speak(utterance);
-  }
-};
+
 
 const MenuPage: React.FC = () => {
+
+  const [voices, setVoices] = useState<SpeechSynthesisVoice[]>([]);
+
+  useEffect(() => {
+    const synth = window.speechSynthesis;
+    const updateVoices = () => setVoices(synth.getVoices());
+    synth.addEventListener("voiceschanged", updateVoices);
+    updateVoices();
+    return () => synth.removeEventListener("voiceschanged", updateVoices);
+  }, []);
+
   const customer = useAppStore(state => state.customer);
   const setCustomer = useAppStore(state => state.setCustomer);
 
@@ -29,6 +31,45 @@ const MenuPage: React.FC = () => {
   const [products, setProducts] = useState<IProduct[]>([]);
   const [ingredients, setIngredients] = useState<IIngredient[]>([]);
   const [totals, setTotals] = useState([0, 0, 0, 0]) // subtotal, tax, total, discount
+
+
+const langMap: Record<string,string> = {
+  EN: "en-US",
+  ES: "es-ES",
+  FR: "fr-FR",
+  DE: "de-DE",
+  JA: "ja-JP",
+  ZH: "zh-CN",
+  KO: "ko-KR",
+  AR: "ar-SA",
+  HI: "hi-IN",
+  RU: "ru-RU",
+  PT: "pt-PT",
+  IT: "it-IT",
+  NL: "nl-NL",
+  DEFAULT: "en-US"
+};
+
+const getVoiceForLang = (langCode: string) => {
+  const target = langMap[langCode] || langMap.DEFAULT;
+  let v = voices.find(v => v.lang === target);
+  if (v) return v;
+  // fallback to English
+  v = voices.find(v => v.lang === langMap.EN);
+  return v || voices[0];
+};
+
+// Function to speak text using the Web Speech API
+// Uses Browser's speech synthesis to read out the text
+const speak = (text: string, langCode: string = "EN") => {
+  if (!("speechSynthesis" in window)) return;
+  window.speechSynthesis.cancel();
+  const u = new SpeechSynthesisUtterance(text);
+  u.lang = langMap[langCode] || langMap.DEFAULT;
+  u.voice = getVoiceForLang(langCode);
+  u.rate = 1;
+  window.speechSynthesis.speak(u);
+};
 
   const [ttsEnabled, setTtsEnabled] = useState<boolean>(false);
 
@@ -136,7 +177,7 @@ const MenuPage: React.FC = () => {
     alert(t("Order submitted successfully"))
 
     if (ttsEnabled) {
-      speak("Order submitted successfully");
+      speak("Order submitted successfully", lang);
     }
 
     if (customer && totals[3]) {
@@ -192,44 +233,210 @@ const MenuPage: React.FC = () => {
           id="language-select"
           value={lang}
           onChange={(e) => setLang(e.target.value)}
+          onMouseEnter={() => ttsEnabled && speak("Select Language", lang)}
           className="p-2 border border-gray-300 rounded-md"
         >
-          {/* Main Languages */}
-          <option value="EN">English</option>
-          <option value="ES">Spanish</option>
-          <option value="FR">French</option>
-          <option value="DE">German</option>
-          <option value="JA">Japanese</option>
-          <option value="ZH">Chinese (Simplified)</option>
-          <option value="KO">Korean</option>
-          <option value="AR">Arabic</option>
-          <option value="HI">Hindi</option>
-          <option value="RU">Russian</option>
-          <option value="PT">Portuguese</option>
-          <option value="IT">Italian</option>
-          <option value="NL">Dutch</option>
+            {/* Main Languages */}
+            <option
+            value="EN"
+            onMouseEnter={() => ttsEnabled && speak("English", lang)}
+            >
+            English
+            </option>
+            <option
+            value="ES"
+            onMouseEnter={() => ttsEnabled && speak("Spanish", lang)}
+            >
+            Spanish
+            </option>
+            <option
+            value="FR"
+            onMouseEnter={() => ttsEnabled && speak("French", lang)}
+            >
+            French
+            </option>
+            <option
+            value="DE"
+            onMouseEnter={() => ttsEnabled && speak("German", lang)}
+            >
+            German
+            </option>
+            <option
+            value="JA"
+            onMouseEnter={() => ttsEnabled && speak("Japanese", lang)}
+            >
+            Japanese
+            </option>
+            <option
+            value="ZH"
+            onMouseEnter={() => ttsEnabled && speak("Chinese", lang)}
+            >
+            Chinese (Simplified)
+            </option>
+            <option
+            value="KO"
+            onMouseEnter={() => ttsEnabled && speak("Korean", lang)}
+            >
+            Korean
+            </option>
+            <option
+            value="AR"
+            onMouseEnter={() => ttsEnabled && speak("Arabic", lang)}
+            >
+            Arabic
+            </option>
+            <option
+            value="HI"
+            onMouseEnter={() => ttsEnabled && speak("Hindi", lang)}
+            >
+            Hindi
+            </option>
+            <option
+            value="RU"
+            onMouseEnter={() => ttsEnabled && speak("Russian", lang)}
+            >
+            Russian
+            </option>
+            <option
+            value="PT"
+            onMouseEnter={() => ttsEnabled && speak("Portuguese", lang)}
+            >
+            Portuguese
+            </option>
+            <option
+            value="IT"
+            onMouseEnter={() => ttsEnabled && speak("Italian", lang)}
+            >
+            Italian
+            </option>
+            <option
+            value="NL"
+            onMouseEnter={() => ttsEnabled && speak("Dutch", lang)}
+            >
+            Dutch
+            </option>
 
-          {/* Additional Languages */}
-          <option value="VI">Vietnamese</option>
-          <option value="TA">Tamil</option>
-          <option value="UR">Urdu</option>
-          <option value="FA">Farsi (Persian)</option>
-          <option value="PL">Polish</option>
-          <option value="TR">Turkish</option>
-          <option value="EL">Greek</option>
-          <option value="HE">Hebrew</option>
-          <option value="AM">Amharic</option>
-          <option value="HA">Hausa</option>
-          <option value="TH">Thai</option>
-          <option value="GU">Gujarati</option>
-          <option value="PA">Punjabi</option>
-          <option value="BN">Bengali</option>
-          <option value="RO">Romanian</option>
-          <option value="UK">Ukrainian</option>
-          <option value="SV">Swedish</option>
-          <option value="TL">Tagalog</option>
-          <option value="CMN">Mandarin (Taiwan)</option>
-          <option value="YUE">Cantonese (Hong Kong)</option>
+            {/* Additional Languages */}
+            <option
+            value="VI"
+            onMouseEnter={() => ttsEnabled && speak("Vietnamese", lang)}
+            >
+            Vietnamese
+            </option>
+            <option
+            value="TA"
+            onMouseEnter={() => ttsEnabled && speak("Tamil", lang)}
+            >
+            Tamil
+            </option>
+            <option
+            value="UR"
+            onMouseEnter={() => ttsEnabled && speak("Urdu", lang)}
+            >
+            Urdu
+            </option>
+            <option
+            value="FA"
+            onMouseEnter={() => ttsEnabled && speak("Farsi", lang)}
+            >
+            Farsi (Persian)
+            </option>
+            <option
+            value="PL"
+            onMouseEnter={() => ttsEnabled && speak("Polish", lang)}
+            >
+            Polish
+            </option>
+            <option
+            value="TR"
+            onMouseEnter={() => ttsEnabled && speak("Turkish", lang)}
+            >
+            Turkish
+            </option>
+            <option
+            value="EL"
+            onMouseEnter={() => ttsEnabled && speak("Greek", lang)}
+            >
+            Greek
+            </option>
+            <option
+            value="HE"
+            onMouseEnter={() => ttsEnabled && speak("Hebrew", lang)}
+            >
+            Hebrew
+            </option>
+            <option
+            value="AM"
+            onMouseEnter={() => ttsEnabled && speak("Amharic", lang)}
+            >
+            Amharic
+            </option>
+            <option
+            value="HA"
+            onMouseEnter={() => ttsEnabled && speak("Hausa", lang)}
+            >
+            Hausa
+            </option>
+            <option
+            value="TH"
+            onMouseEnter={() => ttsEnabled && speak("Thai", lang)}
+            >
+            Thai
+            </option>
+            <option
+            value="GU"
+            onMouseEnter={() => ttsEnabled && speak("Gujarati", lang)}
+            >
+            Gujarati
+            </option>
+            <option
+            value="PA"
+            onMouseEnter={() => ttsEnabled && speak("Punjabi", lang)}
+            >
+            Punjabi
+            </option>
+            <option
+            value="BN"
+            onMouseEnter={() => ttsEnabled && speak("Bengali", lang)}
+            >
+            Bengali
+            </option>
+            <option
+            value="RO"
+            onMouseEnter={() => ttsEnabled && speak("Romanian", lang)}
+            >
+            Romanian
+            </option>
+            <option
+            value="UK"
+            onMouseEnter={() => ttsEnabled && speak("Ukrainian", lang)}
+            >
+            Ukrainian
+            </option>
+            <option
+            value="SV"
+            onMouseEnter={() => ttsEnabled && speak("Swedish", lang)}
+            >
+            Swedish
+            </option>
+            <option
+            value="TL"
+            onMouseEnter={() => ttsEnabled && speak("Tagalog", lang)}
+            >
+            Tagalog
+            </option>
+            <option
+            value="CMN"
+            onMouseEnter={() => ttsEnabled && speak("Mandarin", lang)}
+            >
+            Mandarin (Taiwan)
+            </option>
+            <option
+            value="YUE"
+            onMouseEnter={() => ttsEnabled && speak("Cantonese", lang)}
+            >
+            Cantonese (Hong Kong)
+            </option>
         </select>
     </div>
 
@@ -280,14 +487,14 @@ const MenuPage: React.FC = () => {
               <>
                 <h2
   className="text-2xl font-bold"
-  onMouseEnter={() => ttsEnabled && speak(t("Popular Drinks"))}
+  onMouseEnter={() => ttsEnabled && speak(t("Popular Drinks"), lang)}
 >
   {t("Popular Drinks")}
 </h2>
 <button
   className="bg-black text-white px-4 py-2 rounded-lg hover:bg-gray-800 ml-8"
   onClick={() => setShowFullMenu(true)}
-  onMouseEnter={() => ttsEnabled && speak(t("Full Menu"))}
+  onMouseEnter={() => ttsEnabled && speak(t("Full Menu"), lang)}
 >
   {t("Full Menu")}
 </button>
@@ -301,8 +508,8 @@ const MenuPage: React.FC = () => {
   onClick={() => setTtsEnabled(prev => !prev)}
   onMouseEnter={() =>
     ttsEnabled
-      ? speak("Disable Text to Speech Mode")
-      : speak("Enable Text to Speech Mode")
+      ? speak("Disable Text to Speech Mode", lang)
+      : speak("Enable Text to Speech Mode", lang)
   }
 >
   {ttsEnabled ? 'Disable TTS Mode' : 'Enable TTS Mode'}
@@ -317,7 +524,7 @@ const MenuPage: React.FC = () => {
                 key={index}
                 className='bg-gray-100 p-4 rounded-xl w-[180px] h-[180px] flex flex-col justify-between shadow-sm hover:bg-gray-200 cursor-pointer'
                 onClick={() => setSelectedProduct(product)}
-                onMouseEnter={() => ttsEnabled && speak(`${t(product.name)}, $${product.price.toFixed(2)}`)}
+                onMouseEnter={() => ttsEnabled && speak(`${t(product.name)}, $${product.price.toFixed(2)}`, lang)}
               >
                 {product.image_url && (
                   <img 
@@ -344,7 +551,7 @@ const MenuPage: React.FC = () => {
                 <div
                   key={index}
                   className="bg-gray-100 p-4 rounded-xl"
-                  onMouseEnter={() => ttsEnabled && speak(`${t(product.name)}, $${product.price.toFixed(2)}`)}
+                  onMouseEnter={() => ttsEnabled && speak(`${t(product.name)}, $${product.price.toFixed(2)}`, lang)}
                 >
                   {product.image_url && (
                     <img 
@@ -382,7 +589,7 @@ const MenuPage: React.FC = () => {
           <div className="space-y-4">
             {cart.map((elm, index) => (
               <div key={index} className="bg-gray-100 p-4 rounded-xl flex justify-between"
-              onMouseEnter={() => ttsEnabled && speak(elm.name)}
+              onMouseEnter={() => ttsEnabled && speak(elm.name, lang)}
               >
                 <div>
                   <p className="text-xl font-bold">{t(elm.name)}</p>
@@ -395,7 +602,7 @@ const MenuPage: React.FC = () => {
           <div className="p-4 space-y-4 border border-gray-100">
             <div className="flex justify-between">
               <p
-                onMouseEnter={() => ttsEnabled && speak(`Subtotal: $${totals[0].toFixed(2)}`)}
+                onMouseEnter={() => ttsEnabled && speak(`Subtotal: $${totals[0].toFixed(2)}`, lang)}
               >{t("Subtotal")}</p>
 
               <p>${totals[0].toFixed(2)}</p>
@@ -403,7 +610,7 @@ const MenuPage: React.FC = () => {
 
             <div className="flex justify-between">
               <p
-              onMouseEnter={() => ttsEnabled && speak(`Tax: $${totals[1].toFixed(2)}`)}
+              onMouseEnter={() => ttsEnabled && speak(`Tax: $${totals[1].toFixed(2)}`, lang)}
               >{t("Tax 8.25%")}</p>
 
               <p>${totals[1].toFixed(2)}</p>
@@ -418,7 +625,7 @@ const MenuPage: React.FC = () => {
             )}
   
             <div className="flex justify-between text-2xl font-bold"
-              onMouseEnter={() => ttsEnabled && speak(`Total: $${totals[2].toFixed(2)}`)}
+              onMouseEnter={() => ttsEnabled && speak(`Total: $${totals[2].toFixed(2)}`, lang)}
             >
               <p>{t("Total")}</p>
 
@@ -429,7 +636,7 @@ const MenuPage: React.FC = () => {
               <button
                 className="bg-red-500 text-white p-3 rounded-2xl w-full hover:bg-red-600 cursor-pointer"
                 onClick={resetOrder}
-                onMouseEnter={() => ttsEnabled && speak("Cancel Order")}
+                onMouseEnter={() => ttsEnabled && speak("Cancel Order", lang)}
               >
                 {t("Cancel Order")}
               </button>
@@ -437,7 +644,7 @@ const MenuPage: React.FC = () => {
               <button
                 className="bg-green-500 text-white p-3 rounded-2xl w-full hover:bg-green-600 cursor-pointer"
                 onClick={submitOrder}
-                onMouseEnter={() => ttsEnabled && speak("Submit Order")}
+                onMouseEnter={() => ttsEnabled && speak("Submit Order", lang)}
               >
                 {loading ? (
                   <span className="loading loading-spinner loading-md"></span>
