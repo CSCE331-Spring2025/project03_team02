@@ -16,8 +16,6 @@ const InventoryPage: React.FC = () => {
   const [quantityField, setQuantityField] = useState<string>("0");
   const [orderQuantityField, setOrderQuantityField] = useState<string>("10");
   const [showModal, setShowModal] = useState(false);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
 
   const employee = useAppStore(state => state.employee);
 
