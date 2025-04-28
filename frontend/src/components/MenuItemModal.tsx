@@ -18,6 +18,22 @@ const MenuItemModal: React.FC<MenuItemModalProps> = ({ ingredients, onSuccess })
   const [selectedIngredients, setSelectedIngredients] = useState<{ id: string; quantity: number }[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [imageFile, setImageFile] = useState<File | null>(null);
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
+
+  // handle image file selection
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setImageFile(file);
+      // create preview url
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setImagePreview(reader.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
 
   const handleIngredientChange = (ingredientId: string, checked: boolean) => {
     if (checked) {
@@ -49,15 +65,27 @@ const MenuItemModal: React.FC<MenuItemModalProps> = ({ ingredients, onSuccess })
     setError("");
 
     try {
-      await axios.post(`${import.meta.env.VITE_API_URL}/addmenuitem`, {
-        name,
-        description,
-        price: priceValue,
-        customizations: customizations || null,
-        alerts: alerts,
-        has_boba: hasBoba,
-        is_seasonal: isSeasonal,
-        ingredient_ids: selectedIngredients
+      const formData = new FormData();
+      
+      // add image file if selected
+      if (imageFile) {
+        formData.append('image', imageFile);
+      }
+
+      // add other form data
+      formData.append('name', name);
+      formData.append('description', description);
+      formData.append('price', priceValue.toString());
+      formData.append('customizations', customizations || '');
+      formData.append('alerts', alerts || '');
+      formData.append('has_boba', hasBoba.toString());
+      formData.append('is_seasonal', isSeasonal.toString());
+      formData.append('ingredient_ids', JSON.stringify(selectedIngredients));
+
+      await axios.post(`${import.meta.env.VITE_API_URL}/addmenuitem`, formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data'
+        }
       });
 
       // Reset form
@@ -68,6 +96,8 @@ const MenuItemModal: React.FC<MenuItemModalProps> = ({ ingredients, onSuccess })
       setIsSeasonal(false);
       setCustomizations("");
       setSelectedIngredients([]);
+      setImageFile(null);
+      setImagePreview(null);
       
       // Call success callback
       onSuccess();
@@ -122,6 +152,28 @@ const MenuItemModal: React.FC<MenuItemModalProps> = ({ ingredients, onSuccess })
               min="0"
             />
           </div>
+        </div>
+
+        {/* image upload section */}
+        <div className="form-control mb-4">
+          <label className="label">
+            <span className="label-text">Product Image</span>
+          </label>
+          <input
+            type="file"
+            accept="image/*"
+            className="input input-bordered"
+            onChange={handleImageChange}
+          />
+          {imagePreview && (
+            <div className="mt-2">
+              <img 
+                src={imagePreview} 
+                alt="Preview" 
+                className="w-32 h-32 object-cover rounded"
+              />
+            </div>
+          )}
         </div>
         
         <div className="form-control mb-4">
