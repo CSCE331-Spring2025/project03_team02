@@ -55,6 +55,9 @@ const CustomizationModal: React.FC<Props> = ({ product, onSubmit, ingredients, t
             customizedProduct.price = customizedProduct.price + 2
         }
 
+        //@ts-expect-error Error due to accesing DOM directly
+        document.getElementById('customization-modal').close()
+
         onSubmit(customizedProduct);
     }
 
