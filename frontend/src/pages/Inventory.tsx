@@ -97,7 +97,7 @@ const InventoryPage: React.FC = () => {
     }
   };
 
-  const addNewItem = async (formData: FormData) => {
+  const addNewItem = async (formData: FormData | any) => {
     try {
       const res = tableType === 'Products'
         ? await axios.post(`${import.meta.env.VITE_API_URL}/addproduct`, formData, {
@@ -105,7 +105,11 @@ const InventoryPage: React.FC = () => {
               'Content-Type': 'multipart/form-data'
             }
           })
-        : await axios.post(`${import.meta.env.VITE_API_URL}/addingredient`, formData);
+        : await axios.post(`${import.meta.env.VITE_API_URL}/addingredient`, formData, {
+            headers: {
+              'Content-Type': 'application/json'
+            }
+          });
       
       if (res.data.success) {
         if(tableType === 'Products') {

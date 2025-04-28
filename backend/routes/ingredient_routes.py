@@ -83,8 +83,8 @@ def add_ingredient():
         # extract and validate request data
         id = data.get('id')
         name = data.get('name')
-        quantity = data.get('stock')
-        supplier = data.get('source')
+        quantity = data.get('quantity')
+        supplier = data.get('supplier')
         expiration = data.get('expiration')
 
         # validate required fields
@@ -93,7 +93,7 @@ def add_ingredient():
 
         # validate quantity is positive
         if not isinstance(quantity, int) or quantity < 0:
-            return jsonify({'error': 'Stock must be a positive number'}), 400
+            return jsonify({'error': 'Quantity must be a positive number'}), 400
 
         # create new ingredient
         new_ingredient = Ingredient(
