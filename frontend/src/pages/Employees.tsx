@@ -344,13 +344,13 @@ const EmployeesPage: React.FC = () => {
                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                       <button
                         onClick={() => editEmployee(employee)}
-                        className="text-indigo-600 hover:text-indigo-900 mr-4"
+                        className="text-indigo-600 hover:text-indigo-900 mr-4 transition-colors duration-200 ease-in-out hover:bg-indigo-50 px-3 py-1 rounded-md active:bg-indigo-100"
                       >
                         Edit
                       </button>
                       <button
                         onClick={() => deleteEmployee(employee.id)}
-                        className="text-red-600 hover:text-red-900"
+                        className="text-red-600 hover:text-red-900 transition-colors duration-200 ease-in-out hover:bg-red-50 px-3 py-1 rounded-md active:bg-red-100"
                       >
                         Delete
                       </button>
