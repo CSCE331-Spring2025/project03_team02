@@ -5,6 +5,7 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
+# blueprint for handling translation-related routes
 translation_routes_bp = Blueprint('translation_routes_bp', __name__)
 
 # # Using DeepL Translation API | Limited to 500,000 char per month
@@ -22,23 +23,28 @@ def translate_text():
     texts = data.get("texts")
     target_lang = data.get("target_lang", "en")
 
+    # validate request data
     if not texts:
         return jsonify({"error": "No texts provided"}), 400
 
+    # set up azure translator api headers
     headers = {
         "Ocp-Apim-Subscription-Key": AZURE_TRANSLATOR_KEY,
         "Ocp-Apim-Subscription-Region": AZURE_TRANSLATOR_REGION,
         "Content-Type": "application/json"
     }
 
+    # format request body for translation
     body = [{"Text": text} for text in texts]
 
+    # make translation request to azure
     response = requests.post(
         f"{AZURE_TRANSLATOR_ENDPOINT}/translate?api-version=3.0&to={target_lang.lower()}",
         headers=headers,
         json=body
     )
 
+    # handle response
     if response.status_code == 200:
         json_response = response.json()
         translations = [item["translations"][0]["text"] for item in json_response]

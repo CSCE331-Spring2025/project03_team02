@@ -2,9 +2,12 @@ import React, { useState } from "react";
 import BarChartProducts from "../components/BarChartProducts";
 import BarChartIngredients from "../components/BarChartIngredients";
 
+// main component for displaying data charts
 const ChartPage: React.FC = () => {
+  // state management for chart view interval
   const [viewInterval, setViewInterval] = useState("day");
 
+  // handle view interval changes
   const handleViewChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     setViewInterval(e.target.value);
   };

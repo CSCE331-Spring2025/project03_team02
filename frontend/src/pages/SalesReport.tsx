@@ -1,13 +1,16 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 
+// interface for sales report item data structure
 interface ISalesReportItem {
     product_name: string;
     total_quantity_sold: number;
     total_sales: number;
 }
 
+// main component for sales report generation
 const SalesReportPage: React.FC = () => {
+    // state management for report data and ui
     const [items, setItems] = useState<ISalesReportItem[]>([]);
     const [loading, setLoading] = useState(true);
     const [selectedInterval, setSelectedInterval] = useState<string>("today");
@@ -16,6 +19,7 @@ const SalesReportPage: React.FC = () => {
     const [startTime, setStartTime] = useState<string>("00:00:00");
     const [endTime, setEndTime] = useState<string>("23:59:59");  // Fixed end time to 59 for better coverage
 
+    // fetch sales report data from the api
     const getSalesReport = async (interval: string, customStart?: string, customEnd?: string) => {
         try {
             setLoading(true);
@@ -38,6 +42,7 @@ const SalesReportPage: React.FC = () => {
         }
     };
 
+    // handle interval selection changes
     const handleIntervalChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
         const interval = event.target.value;
         setSelectedInterval(interval);
@@ -87,10 +92,12 @@ const SalesReportPage: React.FC = () => {
         }
     };
 
+    // handle custom date range application
     const handleCustomDateApply = () => {
         getSalesReport("custom", startDate, endDate);
     };
 
+    // fetch initial report data on component mount
     useEffect(() => {
         getSalesReport("today");
     }, []);

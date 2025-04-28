@@ -6,6 +6,7 @@ import { useNavigate } from "react-router";
 import useAppStore from "../utils/useAppStore";
 import { FcGoogle } from "react-icons/fc";
 
+// main component for user authentication
 const SignInPage: React.FC = () => {
     const navigate = useNavigate();
     const [errorMessage, setErrorMessage] = useState<string | null>(null);
@@ -13,6 +14,7 @@ const SignInPage: React.FC = () => {
     const setEmployee = useAppStore(state => state.setEmployee);
     const setCustomer = useAppStore(state => state.setCustomer);
 
+    // handle employee authentication with google
     async function signInEmployee(codeResponse: CodeResponse) {
         try {
             const response = await axios.post(
@@ -35,6 +37,7 @@ const SignInPage: React.FC = () => {
         }
     }
 
+    // handle customer authentication with google
     async function signInCustomer(codeResponse: CodeResponse) {
         try {
             const response = await axios.post(
@@ -57,6 +60,7 @@ const SignInPage: React.FC = () => {
         }
     }
 
+    // google login configuration for employees
     const googleEmployeeLogin = useGoogleLogin({
         flow: "auth-code",
         onSuccess: async (codeResponse) => {
@@ -73,6 +77,7 @@ const SignInPage: React.FC = () => {
         },
     });
 
+    // google login configuration for customers
     const googleCustomerLogin = useGoogleLogin({
         flow: "auth-code",
         onSuccess: async (codeResponse) => {

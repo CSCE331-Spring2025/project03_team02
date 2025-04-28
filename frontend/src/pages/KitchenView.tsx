@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { IIngredient } from "../utils/interfaces";
 
+// interface for order ticket data structure
 interface OrderTicket {
   id: string;
   products: {
@@ -14,19 +15,23 @@ interface OrderTicket {
   total: number;
 }
 
+// main component for kitchen order management
 const KitchenView: React.FC = () => {
   const [orders, setOrders] = useState<OrderTicket[]>([]);
 
+  // fetch incomplete orders from the api
   const fetchOrders = async () => {
     const res = await axios.get(`${import.meta.env.VITE_API_URL}/getorders`);
     setOrders(res.data.orders);
   };
 
+  // mark an order as complete
   const markOrderComplete = async (orderId: string) => {
     await axios.post(`${import.meta.env.VITE_API_URL}/completeorder`, { orderId });
     setOrders(prev => prev.filter(o => o.id !== orderId));
   };
 
+  // fetch orders on component mount and set up refresh interval
   useEffect(() => {
     fetchOrders();
     const interval = setInterval(fetchOrders, 10000);
