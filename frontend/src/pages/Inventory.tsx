@@ -15,8 +15,9 @@ const InventoryPage: React.FC = () => {
   const [selectedRow, setSelectedRow] = useState<IIngredient | IProduct | null>(null);
   const [quantityField, setQuantityField] = useState<string>("0");
   const [orderQuantityField, setOrderQuantityField] = useState<string>("10");
-
-  const [showModal, setShowModal] = useState(false); 
+  const [showModal, setShowModal] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const employee = useAppStore(state => state.employee);
 
@@ -98,11 +99,15 @@ const InventoryPage: React.FC = () => {
     }
   };
 
-  const addNewItem = async (newItem: IProduct) => {
+  const addNewItem = async (formData: FormData) => {
     try {
       const res = tableType === 'Products'
-        ? await axios.post(`${import.meta.env.VITE_API_URL}/addproduct`, newItem)
-        : await axios.post(`${import.meta.env.VITE_API_URL}/addingredient`, newItem);
+        ? await axios.post(`${import.meta.env.VITE_API_URL}/addproduct`, formData, {
+            headers: {
+              'Content-Type': 'multipart/form-data'
+            }
+          })
+        : await axios.post(`${import.meta.env.VITE_API_URL}/addingredient`, formData);
       
       if (res.data.success) {
         if(tableType === 'Products') {
@@ -128,8 +133,8 @@ const InventoryPage: React.FC = () => {
     setShowModal(false);
   };
 
-  const handleModalSubmit = (newItem: IProduct) => {
-    addNewItem(newItem);
+  const handleModalSubmit = (formData: FormData) => {
+    addNewItem(formData);
   };
 
   const handleRowSelect = (item: IIngredient | IProduct) => {

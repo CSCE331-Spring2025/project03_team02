@@ -1,9 +1,19 @@
 from flask import Blueprint, jsonify, request
+import os
+from werkzeug.utils import secure_filename
+import json
 
 from database import db, Product, Ingredient, ProductIngredient
 
 # blueprint for handling product-related routes
 product_routes_bp = Blueprint('product_routes', __name__)
+
+# configure upload folder
+UPLOAD_FOLDER = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), 'frontend', 'public', 'images')
+ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
+
+def allowed_file(filename):
+    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
 '''
 GET products endpoint
@@ -120,34 +130,52 @@ This endpoint creates a new menu item (regular or seasonal) with the provided de
 @product_routes_bp.route("/addmenuitem", methods=['POST'])
 def add_menu_item():
     try:
-        data = request.get_json()
+        # handle image upload
+        image_file = request.files.get('image')
+        image_url = None
+
+        if image_file:
+            if not allowed_file(image_file.filename):
+                return jsonify({'error': 'Invalid file type. Allowed types: png, jpg, jpeg, gif'}), 400
+            
+            try:
+                # Get the filename and strip the extension
+                filename = os.path.splitext(secure_filename(image_file.filename))[0]
+                # save file with product id as prefix
+                image_url = filename
+                file_path = os.path.join(UPLOAD_FOLDER, f"{filename}.png")
+                image_file.save(file_path)
+            except Exception as e:
+                print(f"Error saving image: {str(e)}")
+                return jsonify({'error': f'Failed to save image: {str(e)}'}), 500
 
         # extract product details from request
-        name = data.get('name')
-        description = data.get('description')
-        price = data.get('price')
-        customizations = data.get('customizations')
-        alerts = data.get('alerts')
-        has_boba = data.get('has_boba', False)
-        is_seasonal = data.get('is_seasonal', False)
-        ingredient_ids = data.get('ingredient_ids', [])
+        name = request.form.get('name')
+        description = request.form.get('description')
+        price = request.form.get('price')
+        customizations = request.form.get('customizations')
+        alerts = request.form.get('alerts')
+        has_boba = request.form.get('has_boba') == 'true'
+        is_seasonal = request.form.get('is_seasonal') == 'true'
+        ingredient_ids = json.loads(request.form.get('ingredient_ids', '[]'))
 
         # validate required fields
         if not name or not description or price is None:
             return jsonify({'error': 'Missing required fields'}), 400
 
-        if price < 0:
+        if float(price) < 0:
             return jsonify({'error': 'Price cannot be negative'}), 400
 
         # create new product
         new_product = Product(
             name=name,
             description=description,
-            price=price,
+            price=float(price),
             customizations=customizations,
             has_boba=has_boba,
             alerts=alerts,
-            is_seasonal=is_seasonal
+            is_seasonal=is_seasonal,
+            image_url=image_url
         )
 
         db.session.add(new_product)
@@ -185,7 +213,8 @@ def add_menu_item():
                 'price': float(new_product.price),
                 'customizations': new_product.customizations,
                 'has_boba': new_product.has_boba,
-                'is_seasonal': new_product.is_seasonal
+                'is_seasonal': new_product.is_seasonal,
+                'image_url': new_product.image_url
             }
         })
 
@@ -204,21 +233,29 @@ This endpoint adds a new product to the menu
 @product_routes_bp.route("/addproduct", methods=['POST'])
 def add_product():
     try:
-        data = request.get_json()
+        # handle image upload
+        image_file = request.files.get('image')
+        image_url = None
+
+        if image_file and allowed_file(image_file.filename):
+            filename = secure_filename(image_file.filename)
+            # save file with product id as prefix
+            image_url = filename
+            image_file.save(os.path.join(UPLOAD_FOLDER, filename))
 
         # extract and validate product details
-        id = data.get('id')
-        name = data.get('name')
-        description = data.get('description')
-        price = data.get('price')
-        customizations = data.get('customizations')
-        alerts = data.get('alerts')
-        boba = data.get('boba')
+        id = request.form.get('id')
+        name = request.form.get('name')
+        description = request.form.get('description')
+        price = request.form.get('price')
+        customizations = request.form.get('customizations')
+        alerts = request.form.get('alerts')
+        boba = request.form.get('boba')
 
         if not id or not name or not description or price is None:
             return jsonify({'error': 'Missing required fields'}), 400
 
-        if not isinstance(price, (int, float)) or price < 0:
+        if not isinstance(float(price), (int, float)) or float(price) < 0:
             return jsonify({'error': 'Price must be a positive number'}), 400
 
         has_boba = True if boba == 'Yes' else False
@@ -228,10 +265,11 @@ def add_product():
             id=id,
             name=name,
             description=description,
-            price=price,
+            price=float(price),
             customizations=customizations,
             alerts=alerts,
-            has_boba=has_boba
+            has_boba=has_boba,
+            image_url=image_url
         )
 
         db.session.add(new_product)
@@ -242,4 +280,4 @@ def add_product():
         print(error)
         return jsonify({'error': 'Something went wrong!'}), 500
 
-    return jsonify({"success": True, "data": {'id': new_product.id, 'name': new_product.name, 'description': new_product.description, 'price': new_product.price, 'customizations': new_product.customizations, 'boba': new_product.has_boba}})
+    return jsonify({"success": True, "data": {'id': new_product.id, 'name': new_product.name, 'description': new_product.description, 'price': new_product.price, 'customizations': new_product.customizations, 'boba': new_product.has_boba, 'image_url': new_product.image_url}})
