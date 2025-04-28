@@ -37,24 +37,34 @@ const NewItemModal: React.FC<Props> = ({ showModal, onClose, onSubmit, tableType
 
     // handle form submission
     const handleFormSubmit = async () => {
-        const formData = new FormData();
-        
-        // add image file if selected
-        if (imageFile) {
-            formData.append('image', imageFile);
+        if (tableType === 'Products') {
+            const formData = new FormData();
+            
+            // add image file if selected
+            if (imageFile) {
+                formData.append('image', imageFile);
+            }
+
+            // add other form data
+            const newItem = { id, name, description, price: parseFloat(price), customizations, boba, alerts };
+
+            // append all form fields to FormData
+            Object.entries(newItem).forEach(([key, value]) => {
+                formData.append(key, value.toString());
+            });
+
+            onSubmit(formData);
+        } else {
+            // For ingredients, send as JSON
+            const newItem = { 
+                id, 
+                name, 
+                quantity: parseInt(stock), 
+                supplier: source, 
+                expiration 
+            };
+            onSubmit(newItem);
         }
-
-        // add other form data
-        const newItem = tableType === 'Products'
-            ? { id, name, description, price: parseFloat(price), customizations, boba, alerts }
-            : { id, name, stock: parseInt(stock), source, expiration };
-
-        // append all form fields to FormData
-        Object.entries(newItem).forEach(([key, value]) => {
-            formData.append(key, value.toString());
-        });
-
-        onSubmit(formData);
         onClose();
     };
 
