@@ -3,13 +3,15 @@ from sqlalchemy import func
 from datetime import datetime, timedelta
 from database import db, OrderTable, ProductOrder, Product, ProductIngredient, Ingredient
 
+# blueprint for handling chart-related routes
 charts_routes_bp = Blueprint('charts_routes', __name__)
 
 
 def get_date_range(interval):
-    """Helper function to determine date range based on interval"""
+    """helper function to determine date range based on interval"""
     now = datetime.utcnow()
 
+    # calculate start date based on the specified interval
     if interval == "day":
         start_dt = datetime(now.year, now.month, now.day)
     elif interval == "week":
@@ -27,11 +29,13 @@ def get_date_range(interval):
 
 @charts_routes_bp.route('/getproductsusedchart', methods=['GET'])
 def get_products_used_chart():
+    # get interval from query params, default to daily
     interval = request.args.get("interval", "daily").lower()
 
     try:
         start_dt, end_dt = get_date_range(interval)
 
+        # query to get product usage statistics
         query = (
             db.session.query(
                 Product.name.label("label"),
@@ -47,6 +51,7 @@ def get_products_used_chart():
         results = query.all()
         data = [{"label": r.label, "value": r.value} for r in results]
 
+        # return empty data placeholder if no results found
         if not data:
             data = [{"label": "No Data", "value": 0}]
 
@@ -58,11 +63,13 @@ def get_products_used_chart():
 
 @charts_routes_bp.route('/getingredientsusedchart', methods=['GET'])
 def get_ingredients_used_chart():
+    # get interval from query params, default to daily
     interval = request.args.get("interval", "daily").lower()
 
     try:
         start_dt, end_dt = get_date_range(interval)
 
+        # query to get ingredient usage statistics
         query = (
             db.session.query(
                 Ingredient.name.label("label"),
@@ -81,6 +88,7 @@ def get_ingredients_used_chart():
         results = query.all()
         data = [{"label": r.label, "value": r.value} for r in results]
 
+        # return empty data placeholder if no results found
         if not data:
             data = [{"label": "No Data", "value": 0}]
 

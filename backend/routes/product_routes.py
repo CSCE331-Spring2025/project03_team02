@@ -2,6 +2,7 @@ from flask import Blueprint, jsonify, request
 
 from database import db, Product, Ingredient, ProductIngredient
 
+# blueprint for handling product-related routes
 product_routes_bp = Blueprint('product_routes', __name__)
 
 '''
@@ -15,16 +16,18 @@ def get_products():
     products = []
 
     try:
+        # fetch all products and ingredients
         product_result = Product.query.all()
         ingredient_result = Ingredient.query.all()
         ingredient_map = {
             str(ingredient.id): ingredient for ingredient in ingredient_result
         }
 
+        # format product data with ingredients and reviews
         for product in product_result:
             ingredients = []
 
-            # Get Ingredients
+            # get ingredient details for each product
             for pi in product.product_ingredients:
                 ingredient = ingredient_map.get(str(pi.ingredientid))
                 if ingredient is None:
@@ -39,7 +42,7 @@ def get_products():
                 }
                 ingredients.append(ingredient_data)
 
-            # NEW: Get Reviews
+            # get review details for each product
             reviews = []
             for review in product.product_reviews:
                 review_data = {
@@ -69,18 +72,19 @@ def get_products():
         return jsonify({'error': 'Something went wrong!'}), 500
 
     return jsonify({'data': products})
+
 '''
 UPDATE product SET price endpoint
 
 This endpoint changes the price of a specific product id
 '''
 
-
 @product_routes_bp.route("/updateproductprice", methods=['POST'])
 def update_product_price():
     try:
         data = request.get_json()
 
+        # extract and validate request data
         product_id = data.get('id')
         new_price = data.get('price')
 
@@ -91,6 +95,7 @@ def update_product_price():
         if new_price < 0:
             return jsonify({'error': ':Price cannot be negative'}), 500
 
+        # find and update product price
         product = Product.query.filter_by(id=product_id).first()
         if not product:
             return jsonify({'error': 'Ingredient not found'}), 404
@@ -112,13 +117,12 @@ ADD menu item endpoint
 This endpoint creates a new menu item (regular or seasonal) with the provided details
 '''
 
-
 @product_routes_bp.route("/addmenuitem", methods=['POST'])
 def add_menu_item():
     try:
         data = request.get_json()
 
-        # Extract product info
+        # extract product details from request
         name = data.get('name')
         description = data.get('description')
         price = data.get('price')
@@ -128,14 +132,14 @@ def add_menu_item():
         is_seasonal = data.get('is_seasonal', False)
         ingredient_ids = data.get('ingredient_ids', [])
 
-        # Validate required fields
+        # validate required fields
         if not name or not description or price is None:
             return jsonify({'error': 'Missing required fields'}), 400
 
         if price < 0:
             return jsonify({'error': 'Price cannot be negative'}), 400
 
-        # Create new product
+        # create new product
         new_product = Product(
             name=name,
             description=description,
@@ -147,20 +151,20 @@ def add_menu_item():
         )
 
         db.session.add(new_product)
-        db.session.flush()  # Get the new product ID
+        db.session.flush()  # get the new product id
 
-        # Add ingredients to the product
+        # add ingredients to the product
         for ing_data in ingredient_ids:
             ingredient_id = ing_data.get('id')
             quantity = ing_data.get('quantity', 1)
 
-            # Check if ingredient exists
+            # check if ingredient exists
             ingredient = Ingredient.query.filter_by(id=ingredient_id).first()
             if not ingredient:
                 db.session.rollback()
                 return jsonify({'error': f'Ingredient with ID {ingredient_id} not found'}), 404
 
-            # Create product ingredient relationship
+            # create product ingredient relationship
             product_ingredient = ProductIngredient(
                 productid=new_product.id,
                 ingredientid=ingredient_id,
@@ -171,7 +175,7 @@ def add_menu_item():
 
         db.session.commit()
 
-        # Return the newly created product
+        # return the newly created product
         return jsonify({
             'success': True,
             'data': {
@@ -197,12 +201,12 @@ ADD product endpoint
 This endpoint adds a new product to the menu
 '''
 
-
 @product_routes_bp.route("/addproduct", methods=['POST'])
 def add_product():
     try:
         data = request.get_json()
 
+        # extract and validate product details
         id = data.get('id')
         name = data.get('name')
         description = data.get('description')
@@ -219,6 +223,7 @@ def add_product():
 
         has_boba = True if boba == 'Yes' else False
 
+        # create new product
         new_product = Product(
             id=id,
             name=name,

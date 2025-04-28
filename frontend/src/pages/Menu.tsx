@@ -7,9 +7,8 @@ import useAppStore from "../utils/useAppStore";
 import CustomizationModal from "../components/CustomizationModal";
 import MenuItemModal from "../components/MenuItemModal";
 
-
-// Function to speak text using the Web Speech API
-// Uses Browser's speech synthesis to read out the text
+// function to speak text using the web speech api
+// uses browser's speech synthesis to read out the text
 const speak = (text: string) => {
   if ('speechSynthesis' in window) {
     const utterance = new SpeechSynthesisUtterance(text);
@@ -19,11 +18,13 @@ const speak = (text: string) => {
   }
 };
 
+// main component for menu management
 const MenuPage: React.FC = () => {
   const navigate = useNavigate();
 
   const [loading, setLoading] = useState(false);
 
+  // state management for menu items and order
   const [selectedProduct, setSelectedProduct] = useState<IProduct | null>();
   const [products, setProducts] = useState<IProduct[]>([]);
   const [ingredients, setIngredients] = useState<IIngredient[]>([]);
@@ -36,15 +37,18 @@ const MenuPage: React.FC = () => {
 
   const employee = useAppStore(state => state.employee);
   
+  // filter products based on seasonal status
   const filteredProducts = showSeasonalItems
     ? products.filter(product => product.is_seasonal)
     : products.filter(product => !product.is_seasonal);
 
+  // fetch menu items and ingredients on component mount
   useEffect(() => {
     getProducts();
     getIngredients();
   }, []);
 
+  // show customization modal when product is selected
   useEffect(() => {
     if (products.length > 0 && selectedProduct) {
       // @ts-expect-error Expect error from accessing DOM directly
@@ -52,6 +56,7 @@ const MenuPage: React.FC = () => {
     }
   }, [selectedProduct])
 
+  // fetch all menu items from the api
   const getProducts = async () => {
     try {
       const res = (await axios.get(`${import.meta.env.VITE_API_URL}/getproducts`)).data;
@@ -61,6 +66,7 @@ const MenuPage: React.FC = () => {
     }
   }
 
+  // fetch all ingredients from the api
   const getIngredients = async () => {
     try {
       const res = (await axios.get(`${import.meta.env.VITE_API_URL}/getingredients`)).data;
@@ -70,12 +76,14 @@ const MenuPage: React.FC = () => {
     }
   }
 
+  // add product to cart and update totals
   const addProductToCart = (product: IProduct) => {
     const newCart = [...cart, product];
     setCart(newCart);
     updateTotals(newCart);
   }
 
+  // calculate order totals including tax
   const updateTotals = (cart: IProduct[]) => {
     let newSubtotal = 0;
 
@@ -89,6 +97,7 @@ const MenuPage: React.FC = () => {
     setTotals([newSubtotal, taxTotal, newTotal])
   }
 
+  // submit order to the api
   const submitOrder = async () => {
     if (!cart.length) return;
 
@@ -117,22 +126,26 @@ const MenuPage: React.FC = () => {
     alert("Order submitted successfully");
   }
 
+  // reset order state
   const resetOrder = () => {
     const newCart: IProduct[] = [];
     setCart(newCart);
     updateTotals(newCart)
   }
 
+  // open menu item modal for adding new items
   const openMenuItemModal = () => {
     // @ts-expect-error Expect error from accessing DOM directly
     document.getElementById('menu-item-modal').showModal();
   }
 
+  // refresh product list after adding new item
   const handleMenuItemAdded = () => {
     // Refresh product list to show the new menu item
     getProducts();
   }
 
+  // redirect if not logged in or not a manager
   if (!employee || !employee.is_manager) {
     navigate("/signin");
   }

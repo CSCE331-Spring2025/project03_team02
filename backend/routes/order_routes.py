@@ -5,18 +5,21 @@ import uuid
 
 from database import Customer, db, OrderTable, ProductOrder, Ingredient
 
+# blueprint for handling order-related routes
 order_routes_bp = Blueprint('order_routes', __name__)
 
 @order_routes_bp.route('/getorders', methods=['GET'])
 def get_orders():
     try:
+        # fetch incomplete orders sorted by date
         orders = OrderTable.query.filter_by(completed=False).order_by(OrderTable.order_date.asc()).all()
         result = []
 
+        # format order data with product and ingredient details
         for order in orders:
             products_info = []
             for po in order.product_orders:
-                product = po.productdb.session.add(order)
+                product = po.product
                 ingredients = [
                     {"id": ing.ingredient.id, "name": ing.ingredient.name}
                     for ing in product.product_ingredients
@@ -44,16 +47,17 @@ def get_orders():
         return jsonify({"error": "Failed to fetch orders"}), 500
 
 
-
 @order_routes_bp.route('/completeorder', methods=['POST'])
 def complete_order():
     data = request.get_json()
     order_id = data.get('orderId')
 
+    # validate order id
     if not order_id:
         return jsonify({"error": "Missing orderId"}), 400
 
     try:
+        # find and mark order as complete
         order = OrderTable.query.get(order_id)
         if not order:
             return jsonify({"error": "Order not found"}), 404
@@ -78,6 +82,7 @@ This endpoint creates a new order in the order table, product_order table and de
 def submit_order():
     data = request.get_json()
     
+    # extract order details from request
     order_id = uuid.uuid4()
     products = data.get('products')
     ingredients = data.get('ingredients')
@@ -88,6 +93,7 @@ def submit_order():
     order_date = datetime.now()
 
     try:
+        # create new order record
         order = OrderTable(id=order_id, employeeid=employee_id, total=total, order_date=order_date)
         customer = Customer.query.filter_by(id=str(customer_id)).first()
         
@@ -99,6 +105,7 @@ def submit_order():
         return jsonify({'error': 'Something went wrong!'}), 500
 
     try:
+        # create product order records and update customer points
         for product_id in products:
             product_order_id = uuid.uuid4()
             order_id = order.id
@@ -122,6 +129,7 @@ def submit_order():
         return jsonify({'error': 'Something went wrong!'}), 500
     
     try:
+        # update ingredient quantities
         for ingredient_id in ingredients:
             db_ingredient = Ingredient.query.filter_by(id=ingredient_id).first()
 

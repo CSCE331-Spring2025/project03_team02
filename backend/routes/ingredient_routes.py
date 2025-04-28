@@ -2,6 +2,7 @@ from flask import Blueprint, jsonify, request
 
 from database import db, Ingredient
 
+# blueprint for handling ingredient-related routes
 ingredient_routes_bp = Blueprint('ingredient_routes', __name__)
 
 '''
@@ -14,8 +15,10 @@ def get_ingredients():
     ingredients = []
 
     try:
+        # fetch all ingredients from database
         ingredients_results = Ingredient.query.all()
 
+        # format ingredient data for response
         for ingredient in ingredients_results:
             ingredients.append({
                 'id': str(ingredient.id),
@@ -27,7 +30,6 @@ def get_ingredients():
 
     except Exception as error:
         print(error)
-
         return jsonify({'error': 'Something went wrong!'}), 500
 
     return jsonify({'data': ingredients})
@@ -42,6 +44,7 @@ def update_ingredient_stock():
     try:
         data = request.get_json()
 
+        # extract and validate request data
         ingredient_id = data.get('id')
         new_quantity = data.get('quantity')
 
@@ -52,6 +55,7 @@ def update_ingredient_stock():
         if new_quantity < 0:
             return jsonify({'error': 'Quantity cannot be negative'}), 500
         
+        # find and update ingredient
         ingredient = Ingredient.query.filter_by(id=ingredient_id).first()
         if not ingredient:
             return jsonify({'error': 'Ingredient not found'}), 404
@@ -76,18 +80,22 @@ def add_ingredient():
     try:
         data = request.get_json()
 
+        # extract and validate request data
         id = data.get('id')
         name = data.get('name')
         quantity = data.get('stock')
         supplier = data.get('source')
         expiration = data.get('expiration')
 
+        # validate required fields
         if not id or not name or not supplier or quantity is None or not expiration:
             return jsonify({'error': 'Missing required fields'}), 400
 
+        # validate quantity is positive
         if not isinstance(quantity, int) or quantity < 0:
             return jsonify({'error': 'Stock must be a positive number'}), 400
 
+        # create new ingredient
         new_ingredient = Ingredient(
             id=id,
             name=name,
