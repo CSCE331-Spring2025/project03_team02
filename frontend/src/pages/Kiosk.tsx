@@ -140,7 +140,11 @@ const MenuPage: React.FC = () => {
     }
 
     if (customer && totals[3]) {
-      setCustomer({ ...customer, points: customer.points - Math.floor(totals[3]) * 10 });
+      if(totals[3] * 0.1 <= total) {
+        setCustomer({ ...customer, points: 0 });  
+      } else {
+        setCustomer({ ...customer, points: customer.points - Math.floor(totals[3]) * 10 });
+      }
     } else {
       if (customer) {
         setCustomer({ ...customer, points: customer.points + Math.ceil(total) });

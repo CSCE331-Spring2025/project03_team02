@@ -41,6 +41,10 @@ const CustomizationModal: React.FC<Props> = ({ product, onSubmit, ingredients, t
         );
     };
 
+    useEffect(() => {
+        setProductReviews(product.reviews);
+    }, [product]);
+    
     const submitCustomizations = () => {
         const customizedProduct = { ...product };
         customizedProduct.ingredients = selectedToppings

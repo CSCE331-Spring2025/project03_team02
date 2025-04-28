@@ -117,7 +117,7 @@ def customer_login():
         # Step 3: Check if user exists in database
         customer = Customer.query.filter_by(email=email).first()
         if not customer:
-            new_customer_id = uuid.uuid4()
+            new_customer_id = str(uuid.uuid4())
             name = user_info.get('name')
             email = user_info.get('email')
             birthday = user_info.get('birthday')
@@ -129,8 +129,6 @@ def customer_login():
             db.session.add(customer)
             db.session.commit()
             
-            return jsonify(message="New customer created"), 201
-        
         user_info['id'] = customer.id
         user_info['points'] = customer.points
 
@@ -143,4 +141,5 @@ def customer_login():
         return response, 200
 
     except Exception as e:
+        print(e)
         return jsonify(message="Server error", error=str(e)), 500

@@ -108,7 +108,10 @@ def submit_order():
             
             if(customer):
                 if(discount > 0):
-                    customer.points = customer.points - (math.floor(discount) * 10)
+                    if(customer.points * 0.1 <= total):
+                        customer.points = 0
+                    else:
+                        customer.points = customer.points - (math.floor(discount) * 10)
                 else:
                     customer.points = customer.points + math.ceil(total)
         db.session.add(product_order)
