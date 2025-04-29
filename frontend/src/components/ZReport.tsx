@@ -33,33 +33,33 @@ const ZReport: React.FC<ZReportProps> = ({
                 </h2>
                 <button
                     onClick={onShowZReportConfirmation}
-                    className="bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700 text-white px-5 py-2.5 rounded-lg font-medium focus:outline-none focus:ring-2 focus:ring-blue-300 dark:focus:ring-blue-800"
+                    className="bg-blue-500 hover:bg-blue-600  text-white px-5 py-2.5 rounded-lg font-medium focus:outline-none focus:ring-2 focus:ring-blue-300 "
                     disabled={loading}
                 >
                     Generate Z-Report
                 </button>
             </div>
             {!zReportGenerated ? (
-                <div className="bg-white dark:bg-gray-800 rounded-xl p-8 h-64 flex items-center justify-center shadow-sm text-center">
+                <div className="bg-white rounded-xl p-8 h-64 flex items-center justify-center shadow-sm text-center">
                     <div>
-                        <p className="text-gray-500 dark:text-gray-400 italic mb-2">
+                        <p className="text-gray-500  italic mb-2">
                             Z-Report will appear here after generation.
                         </p>
-                        <p className="text-sm text-gray-500 dark:text-gray-400">
+                        <p className="text-sm text-gray-500">
                             Note: Generating a Z-Report will clear the X-Report data.
                         </p>
                     </div>
                 </div>
             ) : loading ? (
-                <div className="flex justify-center items-center h-64 bg-white dark:bg-gray-800 rounded-xl shadow-sm">
+                <div className="flex justify-center items-center h-64 bg-white rounded-xl shadow-sm">
                     <p>Loading...</p>
                 </div>
             ) : (
                 zData && (
                     <div className="space-y-6">
                         {/* Z-Report Sales Summary */}
-                        <div className="bg-white dark:bg-gray-800 rounded-xl overflow-hidden shadow-sm">
-                            <div className="bg-green-100 dark:bg-green-900 p-4 font-bold text-lg">
+                        <div className="bg-white  rounded-xl overflow-hidden shadow-sm">
+                            <div className="bg-green-100  p-4 font-bold text-lg">
                                 Z-Report: {zData.periodName} Sales Summary
                             </div>
                             <div className="p-4">
@@ -70,10 +70,10 @@ const ZReport: React.FC<ZReportProps> = ({
                                     <div className="text-right">{formatCurrency(zData.subtotal)}</div>
                                     <div className="font-medium">Total Tax:</div>
                                     <div className="text-right">{formatCurrency(zData.totalTax)}</div>
-                                    <div className="font-medium text-lg pt-2 border-t border-gray-200 dark:border-gray-700">
+                                    <div className="font-medium text-lg pt-2 border-t border-gray-200 ">
                                         Total Sales:
                                     </div>
-                                    <div className="text-right text-lg font-bold pt-2 border-t border-gray-200 dark:border-gray-700">
+                                    <div className="text-right text-lg font-bold pt-2 border-t border-gray-200 ">
                                         {formatCurrency(zData.totalSales)}
                                     </div>
                                 </div>
@@ -81,15 +81,15 @@ const ZReport: React.FC<ZReportProps> = ({
                         </div>
 
                         {/* Ingredients Used */}
-                        <div className="bg-white dark:bg-gray-800 rounded-xl overflow-hidden shadow-sm">
-                            <div className="bg-green-100 dark:bg-green-900 p-4 font-bold text-lg">
+                        <div className="bg-white rounded-xl overflow-hidden shadow-sm">
+                            <div className="bg-green-100 p-4 font-bold text-lg">
                                 Ingredients Used {zData.periodText || ""}
                             </div>
                             <div className="overflow-hidden">
                                 {zData.ingredientsUsed && zData.ingredientsUsed.length > 0 ? (
                                     <table className="w-full">
                                         <thead>
-                                            <tr className="bg-gray-50 dark:bg-gray-700">
+                                            <tr className="bg-gray-50 ">
                                                 <th className="p-4 text-left font-semibold">Ingredient</th>
                                                 <th className="p-4 text-right font-semibold">Count</th>
                                             </tr>
@@ -98,9 +98,9 @@ const ZReport: React.FC<ZReportProps> = ({
                                             {zData.ingredientsUsed.map((ingredient, index) => (
                                                 <tr
                                                     key={index}
-                                                    className={`border-t border-gray-200 dark:border-gray-700 ${index % 2 === 0
-                                                            ? "bg-gray-50 dark:bg-gray-800"
-                                                            : "bg-white dark:bg-gray-900"
+                                                    className={`border-t border-gray-200 ${index % 2 === 0
+                                                            ? "bg-gray-50 "
+                                                            : "bg-white "
                                                         }`}
                                                 >
                                                     <td className="p-4">{ingredient.name}</td>
@@ -110,7 +110,7 @@ const ZReport: React.FC<ZReportProps> = ({
                                         </tbody>
                                     </table>
                                 ) : (
-                                    <p className="p-6 text-center italic text-gray-500 dark:text-gray-400">
+                                    <p className="p-6 text-center italic text-gray-500 ">
                                         No ingredient usage data available
                                     </p>
                                 )}
@@ -118,15 +118,15 @@ const ZReport: React.FC<ZReportProps> = ({
                         </div>
 
                         {/* Sales Per Employee */}
-                        <div className="bg-white dark:bg-gray-800 rounded-xl overflow-hidden shadow-sm">
-                            <div className="bg-green-100 dark:bg-green-900 p-4 font-bold text-lg">
+                        <div className="bg-white  rounded-xl overflow-hidden shadow-sm">
+                            <div className="bg-green-100  p-4 font-bold text-lg">
                                 Sales Per Employee
                             </div>
                             <div className="overflow-hidden">
                                 {zData.salesPerEmployee && zData.salesPerEmployee.length > 0 ? (
                                     <table className="w-full">
                                         <thead>
-                                            <tr className="bg-gray-50 dark:bg-gray-700">
+                                            <tr className="bg-gray-50 ">
                                                 <th className="p-4 text-left font-semibold">Employee</th>
                                                 <th className="p-4 text-right font-semibold">Orders</th>
                                                 <th className="p-4 text-right font-semibold">Sales</th>
@@ -136,9 +136,9 @@ const ZReport: React.FC<ZReportProps> = ({
                                             {zData.salesPerEmployee.map((employee, index) => (
                                                 <tr
                                                     key={index}
-                                                    className={`border-t border-gray-200 dark:border-gray-700 ${index % 2 === 0
-                                                            ? "bg-gray-50 dark:bg-gray-800"
-                                                            : "bg-white dark:bg-gray-900"
+                                                    className={`border-t border-gray-200  ${index % 2 === 0
+                                                            ? "bg-gray-50 "
+                                                            : "bg-white "
                                                         }`}
                                                 >
                                                     <td className="p-4">{employee.name}</td>
@@ -151,7 +151,7 @@ const ZReport: React.FC<ZReportProps> = ({
                                         </tbody>
                                     </table>
                                 ) : (
-                                    <p className="p-6 text-center italic text-gray-500 dark:text-gray-400">
+                                    <p className="p-6 text-center italic text-gray-500 ">
                                         No employee sales data available
                                     </p>
                                 )}
@@ -160,7 +160,7 @@ const ZReport: React.FC<ZReportProps> = ({
 
                         {/* Z-Report Timestamp */}
                         {zData.generatedAt && (
-                            <div className="text-right text-sm text-gray-500 dark:text-gray-400 p-2">
+                            <div className="text-right text-sm text-gray-500 p-2">
                                 Generated: {new Date(zData.generatedAt).toLocaleString()}
                             </div>
                         )}

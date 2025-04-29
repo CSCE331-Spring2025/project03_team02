@@ -1,7 +1,12 @@
 @import "tailwindcss";
-@plugin "daisyui";
+
+@plugin "daisyui" {
+    themes: light --default
+}
 
 .weather-icon {
-    width: 50px;  /* Adjust the width */
-    height: 50px; /* Adjust the height */
+    width: 50px;
+    /* Adjust the width */
+    height: 50px;
+    /* Adjust the height */
 }

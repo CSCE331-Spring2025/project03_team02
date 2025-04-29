@@ -60,27 +60,27 @@ const XReport: React.FC<XReportProps> = ({
                     X-Report {data ? `(${data.periodName || ""})` : ""}
                 </h2>
                 {data && (
-                    <span className="text-sm text-gray-500 dark:text-gray-400">
+                    <span className="text-sm text-gray-500">
                         {formatDateRange()}
                     </span>
                 )}
             </div>
 
             {loading ? (
-                <div className="flex justify-center items-center h-64 bg-white dark:bg-gray-800 rounded-xl shadow-sm">
+                <div className="flex justify-center items-center h-64 bg-white  rounded-xl shadow-sm">
                     <p>Loading...</p>
                 </div>
             ) : !data ? (
-                <div className="bg-white dark:bg-gray-800 rounded-xl p-8 h-64 flex items-center justify-center shadow-sm text-center">
-                    <p className="text-gray-500 dark:text-gray-400 italic">
+                <div className="bg-white rounded-xl p-8 h-64 flex items-center justify-center shadow-sm text-center">
+                    <p className="text-gray-500  italic">
                         No X-Report data available.
                     </p>
                 </div>
             ) : (
                 <div className="space-y-6">
                     {/* Daily Sales Summary */}
-                    <div className="bg-white dark:bg-gray-800 rounded-xl overflow-hidden shadow-sm">
-                        <div className="bg-blue-100 dark:bg-blue-900 p-4 font-bold text-lg">
+                    <div className="bg-white rounded-xl overflow-hidden shadow-sm">
+                        <div className="bg-blue-100  p-4 font-bold text-lg">
                             {data.periodName} Sales Summary
                         </div>
                         <div className="p-4">
@@ -91,10 +91,10 @@ const XReport: React.FC<XReportProps> = ({
                                 <div className="text-right">{formatCurrency(data.subtotal)}</div>
                                 <div className="font-medium">Total Tax:</div>
                                 <div className="text-right">{formatCurrency(data.totalTax)}</div>
-                                <div className="font-medium text-lg pt-2 border-t border-gray-200 dark:border-gray-700">
+                                <div className="font-medium text-lg pt-2 border-t border-gray-200 ">
                                     Total Sales:
                                 </div>
-                                <div className="text-right text-lg font-bold pt-2 border-t border-gray-200 dark:border-gray-700">
+                                <div className="text-right text-lg font-bold pt-2 border-t border-gray-200 ">
                                     {formatCurrency(data.totalSales)}
                                 </div>
                             </div>
@@ -102,14 +102,14 @@ const XReport: React.FC<XReportProps> = ({
                     </div>
 
                     {/* Time-based Sales */}
-                    <div className="bg-white dark:bg-gray-800 rounded-xl overflow-hidden shadow-sm">
-                        <div className="bg-blue-100 dark:bg-blue-900 p-4 font-bold text-lg">
+                    <div className="bg-white rounded-xl overflow-hidden shadow-sm">
+                        <div className="bg-blue-100 p-4 font-bold text-lg">
                             {data.timeUnitName} Sales
                         </div>
                         <div className="overflow-hidden">
                             <table className="w-full">
                                 <thead>
-                                    <tr className="bg-gray-50 dark:bg-gray-700">
+                                    <tr className="bg-gray-50 ">
                                         <th className="p-4 text-left font-semibold">
                                             {selectedInterval === "today" ||
                                                 selectedInterval === "pastHour"
@@ -128,9 +128,9 @@ const XReport: React.FC<XReportProps> = ({
                                         data.hourlySales.map((hourData, index) => (
                                             <tr
                                                 key={index}
-                                                className={`border-t border-gray-200 dark:border-gray-700 ${index % 2 === 0
-                                                        ? "bg-gray-50 dark:bg-gray-800"
-                                                        : "bg-white dark:bg-gray-900"
+                                                className={`border-t border-gray-200 ${index % 2 === 0
+                                                        ? "bg-gray-50 "
+                                                        : "bg-white "
                                                     }`}
                                             >
                                                 <td className="p-4">{hourData.hour}</td>
@@ -140,16 +140,16 @@ const XReport: React.FC<XReportProps> = ({
                                             </tr>
                                         ))
                                     ) : (
-                                        <tr className="border-t border-gray-200 dark:border-gray-700">
+                                        <tr className="border-t border-gray-200 ">
                                             <td
                                                 colSpan={2}
-                                                className="p-6 text-center italic text-gray-500 dark:text-gray-400"
+                                                className="p-6 text-center italic text-gray-500 "
                                             >
                                                 No {data.timeUnitName.toLowerCase()} sales data available
                                             </td>
                                         </tr>
                                     )}
-                                    <tr className="bg-gray-100 dark:bg-gray-700 font-bold">
+                                    <tr className="bg-gray-100 font-bold">
                                         <td className="p-4">TOTAL</td>
                                         <td className="p-4 text-right">{formatCurrency(data.totalSales)}</td>
                                     </tr>
@@ -159,14 +159,14 @@ const XReport: React.FC<XReportProps> = ({
                     </div>
 
                     {/* Product Sales */}
-                    <div className="bg-white dark:bg-gray-800 rounded-xl overflow-hidden shadow-sm">
-                        <div className="bg-blue-100 dark:bg-blue-900 p-4 font-bold text-lg">
+                    <div className="bg-white rounded-xl overflow-hidden shadow-sm">
+                        <div className="bg-blue-100 p-4 font-bold text-lg">
                             Product Sales
                         </div>
                         <div className="overflow-hidden">
                             <table className="w-full">
                                 <thead>
-                                    <tr className="bg-gray-50 dark:bg-gray-700">
+                                    <tr className="bg-gray-50 ">
                                         <th className="p-4 text-left font-semibold">Product</th>
                                         <th className="p-4 text-right font-semibold">Quantity</th>
                                         <th className="p-4 text-right font-semibold">Total</th>
@@ -177,9 +177,9 @@ const XReport: React.FC<XReportProps> = ({
                                         data.productSales.map((product, index) => (
                                             <tr
                                                 key={index}
-                                                className={`border-t border-gray-200 dark:border-gray-700 ${index % 2 === 0
-                                                        ? "bg-gray-50 dark:bg-gray-800"
-                                                        : "bg-white dark:bg-gray-900"
+                                                className={`border-t border-gray-200  ${index % 2 === 0
+                                                        ? "bg-gray-50 "
+                                                        : "bg-white "
                                                     }`}
                                             >
                                                 <td className="p-4">{product.name}</td>
@@ -190,16 +190,16 @@ const XReport: React.FC<XReportProps> = ({
                                             </tr>
                                         ))
                                     ) : (
-                                        <tr className="border-t border-gray-200 dark:border-gray-700">
+                                        <tr className="border-t border-gray-200 ">
                                             <td
                                                 colSpan={3}
-                                                className="p-6 text-center italic text-gray-500 dark:text-gray-400"
+                                                className="p-6 text-center italic text-gray-500 "
                                             >
                                                 No product sales data available
                                             </td>
                                         </tr>
                                     )}
-                                    <tr className="bg-gray-100 dark:bg-gray-700 font-bold">
+                                    <tr className="bg-gray-100  font-bold">
                                         <td className="p-4">TOTAL</td>
                                         <td className="p-4 text-right">
                                             {data.productSales
@@ -217,14 +217,14 @@ const XReport: React.FC<XReportProps> = ({
                     </div>
 
                     {/* Employee Performance */}
-                    <div className="bg-white dark:bg-gray-800 rounded-xl overflow-hidden shadow-sm">
-                        <div className="bg-blue-100 dark:bg-blue-900 p-4 font-bold text-lg">
+                    <div className="bg-white rounded-xl overflow-hidden shadow-sm">
+                        <div className="bg-blue-100 p-4 font-bold text-lg">
                             Employee Performance
                         </div>
                         <div className="overflow-hidden">
                             <table className="w-full">
                                 <thead>
-                                    <tr className="bg-gray-50 dark:bg-gray-700">
+                                    <tr className="bg-gray-50 ">
                                         <th className="p-4 text-left font-semibold">Employee</th>
                                         <th className="p-4 text-right font-semibold">Orders</th>
                                         <th className="p-4 text-right font-semibold">Sales</th>
@@ -235,9 +235,9 @@ const XReport: React.FC<XReportProps> = ({
                                         data.employeePerformance.map((employee, index) => (
                                             <tr
                                                 key={index}
-                                                className={`border-t border-gray-200 dark:border-gray-700 ${index % 2 === 0
-                                                        ? "bg-gray-50 dark:bg-gray-800"
-                                                        : "bg-white dark:bg-gray-900"
+                                                className={`border-t border-gray-200 ${index % 2 === 0
+                                                        ? "bg-gray-50 "
+                                                        : "bg-white "
                                                     }`}
                                             >
                                                 <td className="p-4">{employee.name}</td>
@@ -248,16 +248,16 @@ const XReport: React.FC<XReportProps> = ({
                                             </tr>
                                         ))
                                     ) : (
-                                        <tr className="border-t border-gray-200 dark:border-gray-700">
+                                        <tr className="border-t border-gray-200 ">
                                             <td
                                                 colSpan={3}
-                                                className="p-6 text-center italic text-gray-500 dark:text-gray-400"
+                                                className="p-6 text-center italic text-gray-500 "
                                             >
                                                 No employee performance data available
                                             </td>
                                         </tr>
                                     )}
-                                    <tr className="bg-gray-100 dark:bg-gray-700 font-bold">
+                                    <tr className="bg-gray-100 font-bold">
                                         <td className="p-4">TOTAL</td>
                                         <td className="p-4 text-right">{data.totalOrders}</td>
                                         <td className="p-4 text-right">{formatCurrency(data.totalSales)}</td>

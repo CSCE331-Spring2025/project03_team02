@@ -190,7 +190,7 @@ const InventoryPage: React.FC = () => {
               <div className="flex items-center mb-4">
                 <label className="mr-2">Select Table:</label>
                 <select
-                  className="border p-1 dark:bg-gray-700 rounded"
+                  className="border p-1  rounded"
                   value={tableType}
                   onChange={(e) => handleTableTypeChange(e.target.value as "Ingredients" | "Products")}
                 >
@@ -240,7 +240,7 @@ const InventoryPage: React.FC = () => {
                   <div className="overflow-x-auto">
                     <table className="min-w-full border">
                       <thead>
-                        <tr className="bg-gray-100 dark:bg-gray-700">
+                        <tr className="bg-gray-100">
                           <th className="py-2 px-4 border">ID</th>
                           <th className="py-2 px-4 border">{tableType === "Products" ? "Name" : "Ingredient"}</th>
                           {tableType === "Products" ? (
@@ -264,7 +264,7 @@ const InventoryPage: React.FC = () => {
                           products.map((product) => (
                             <tr
                               key={product.id}
-                              className={`hover:bg-gray-50 dark:hover:text-black cursor-pointer ${selectedRow?.id === product.id ? 'bg-blue-100 dark:bg-blue-500' : ''}`}
+                              className={`hover:bg-gray-50 cursor-pointer ${selectedRow?.id === product.id ? 'bg-blue-100' : ''}`}
                               onClick={() => handleRowSelect(product)}
                             >
                               <td className="py-3 px-4 border">{product.id}</td>
@@ -279,7 +279,7 @@ const InventoryPage: React.FC = () => {
                           ingredients.map((ingredient) => (
                             <tr
                               key={ingredient.id}
-                              className={`hover:bg-gray-50 dark:hover:text-black cursor-pointer ${selectedRow?.id === ingredient.id ? 'bg-blue-100 dark:bg-blue-500' : ''}`}
+                              className={`hover:bg-gray-50  cursor-pointer ${selectedRow?.id === ingredient.id ? 'bg-blue-100 ' : ''}`}
                               onClick={() => handleRowSelect(ingredient)}
                             >
                               <td className="py-3 px-4 border">{ingredient.id}</td>
@@ -303,7 +303,7 @@ const InventoryPage: React.FC = () => {
               <div className="overflow-x-auto">
                 <table className="min-w-full border">
                   <thead>
-                    <tr className="bg-gray-100 dark:bg-gray-700">
+                    <tr className="bg-gray-100">
                       <th className="py-2 px-4 border">ID</th>
                       <th className="py-2 px-4 border">Ingredient</th>
                       <th className="py-2 px-4 border">Stock</th>
@@ -315,7 +315,7 @@ const InventoryPage: React.FC = () => {
                     {ingredients
                       .filter(ingredient => ingredient.quantity <= 100)
                       .map((ingredient) => (
-                        <tr key={ingredient.id} className="hover:bg-gray-50 dark:hover:text-black">
+                        <tr key={ingredient.id} className="hover:bg-gray-50">
                           <td className="py-3 px-4 border">{ingredient.id}</td>
                           <td className="py-3 px-4 border">{ingredient.name}</td>
                           <td className="py-3 px-4 border">{ingredient.quantity}</td>

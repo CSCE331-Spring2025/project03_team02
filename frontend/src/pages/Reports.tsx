@@ -196,7 +196,7 @@ const Reports: React.FC = () => {
   }
 
   return (
-    <div className="w-full min-h-screen p-6 bg-gray-50 dark:bg-gray-900 text-gray-800 dark:text-gray-100">
+    <div className="w-full min-h-screen p-6 bg-gray-50 text-gray-800">
       <div className="mb-8">
         <h1 className="text-3xl font-bold">Reports</h1>
       </div>
@@ -296,11 +296,11 @@ const Reports: React.FC = () => {
       {/* Z-Report Confirmation Modal */}
       {showZConfirmModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white dark:bg-gray-800 rounded-xl p-6 max-w-md w-full shadow-lg">
-            <h3 className="text-xl font-bold mb-4 text-gray-900 dark:text-white">
+          <div className="bg-white  rounded-xl p-6 max-w-md w-full shadow-lg">
+            <h3 className="text-xl font-bold mb-4 text-gray-900 ">
               Generate Z-Report
             </h3>
-            <div className="mb-6 p-4 bg-yellow-50 dark:bg-yellow-900/30 border-l-4 border-yellow-500 dark:border-yellow-600 text-yellow-800 dark:text-yellow-200">
+            <div className="mb-6 p-4 bg-yellow-50  border-l-4 border-yellow-500  text-yellow-800 ">
               <p className="font-medium mb-1">Warning</p>
               <p className="text-sm">
                 The Z-Report should only be run once per{" "}
@@ -314,19 +314,19 @@ const Reports: React.FC = () => {
                 , typically at the end of business. Generating a Z-Report will clear all current X-Report data.
               </p>
             </div>
-            <p className="mb-6 text-gray-700 dark:text-gray-300">
+            <p className="mb-6 text-gray-700 ">
               Are you sure you want to continue?
             </p>
             <div className="flex justify-end gap-4">
               <button
                 onClick={cancelZReport}
-                className="px-4 py-2 rounded-lg bg-gray-200 hover:bg-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-800 dark:text-gray-200 font-medium"
+                className="px-4 py-2 rounded-lg bg-gray-200 hover:bg-gray-300   text-gray-800  font-medium"
               >
                 Cancel
               </button>
               <button
                 onClick={generateZReport}
-                className="px-4 py-2 rounded-lg bg-red-500 hover:bg-red-600 dark:bg-red-600 dark:hover:bg-red-700 text-white font-medium"
+                className="px-4 py-2 rounded-lg bg-red-500 hover:bg-red-600 text-white font-medium"
               >
                 Confirm
               </button>

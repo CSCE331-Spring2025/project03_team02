@@ -1,13 +1,44 @@
 <!doctype html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Sharetea POS</title>
-  </head>
-  <body>
-    <div id="root"></div>
-    <script type="module" src="/src/main.tsx"></script>
-  </body>
+
+<head>
+  <meta charset="UTF-8" />
+  <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Sharetea POS</title>
+  <style>
+    /* Force light mode styles */
+    html {
+      color-scheme: light;
+      background: white;
+      color: black;
+    }
+
+    /* Optional: Override other styles manually */
+    body {
+      background-color: white;
+      color: black;
+    }
+  </style>
+</head>
+
+<body>
+  <div id="root"></div>
+  <script type="module" src="/src/main.tsx"></script>
+</body>
+
+
+<script>
+  // Disable dark mode CSS if your site dynamically switches based on system theme
+  const metaTheme = document.querySelector('meta[name="color-scheme"]');
+  if (metaTheme) {
+    metaTheme.setAttribute('content', 'light');
+  } else {
+    const meta = document.createElement('meta');
+    meta.name = 'color-scheme';
+    meta.content = 'light';
+    document.head.appendChild(meta);
+  }
+</script>
+
 </html>

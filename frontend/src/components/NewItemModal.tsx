@@ -72,7 +72,7 @@ const NewItemModal: React.FC<Props> = ({ showModal, onClose, onSubmit, tableType
         <>
             {showModal && (
                 <div className="fixed inset-0 flex justify-center items-center">
-                    <div className="bg-white dark:bg-gray-700 p-6 rounded shadow-lg w-96 border">
+                    <div className="bg-white p-6 rounded shadow-lg w-96 border">
                         <h2 className="text-xl mb-4">{tableType === 'Products' ? 'Add New Product' : 'Add New Ingredient'}</h2>
                         <form>
                             <div className="mb-4">
@@ -156,7 +156,7 @@ const NewItemModal: React.FC<Props> = ({ showModal, onClose, onSubmit, tableType
                                     <div className="mb-4">
                                         <label className="block mb-2">Boba</label>
                                         <select
-                                            className="border p-2 w-full dark:bg-gray-700 rounded"
+                                            className="border p-2 w-full rounded"
                                             value={boba}
                                             onChange={(e) => setBoba(e.target.value as 'Yes' | 'No')}
                                         >
