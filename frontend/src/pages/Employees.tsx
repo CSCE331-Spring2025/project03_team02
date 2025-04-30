@@ -73,10 +73,19 @@ const EmployeesPage: React.FC = () => {
   const updateEmployee = async () => {
     if (!currentEmployee) return;
 
+    // Check if trying to edit another manager
+    if (currentEmployee.is_manager && currentEmployee.id !== employee?.id) {
+      const managerCount = employees.filter(emp => emp.is_manager).length;
+      if (managerCount <= 1) {
+        setError("Cannot edit the last manager in the system");
+        return;
+      }
+    }
+
     setLoading(true);
     try {
       await axios.put(
-        `${import.meta.env.VITE_API_URL}/updateemployees/${currentEmployee.id}`,
+        `${import.meta.env.VITE_API_URL}/updateemployee/${currentEmployee.id}`,
         {
           name: formData.name,
           is_manager: formData.is_manager
@@ -106,6 +115,16 @@ const EmployeesPage: React.FC = () => {
   };
 
   const deleteEmployee = async (id: string) => {
+    // Check if trying to delete a manager
+    const employeeToDelete = employees.find(emp => emp.id === id);
+    if (employeeToDelete?.is_manager) {
+      const managerCount = employees.filter(emp => emp.is_manager).length;
+      if (managerCount <= 1) {
+        setError("Cannot delete the last manager in the system");
+        return;
+      }
+    }
+
     if (!window.confirm("Are you sure you want to delete this employee?")) return;
   
     setLoading(true);
