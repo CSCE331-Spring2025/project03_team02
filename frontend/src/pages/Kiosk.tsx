@@ -229,215 +229,111 @@ const speak = (text: string, langCode: string = "EN") => {
         className="h-6 w-auto"
       />
       <label htmlFor="language-select" className="mr-2 font-semibold">Language:</label>
-        <select
-          id="language-select"
-          value={lang}
-          onChange={(e) => setLang(e.target.value)}
-          onMouseEnter={() => ttsEnabled && speak("Select Language", lang)}
-          className="p-2 border border-gray-300 rounded-md"
-        >
-            {/* Main Languages */}
-            <option
-            value="EN"
-            onMouseEnter={() => ttsEnabled && speak("English", lang)}
-            >
-            English
-            </option>
-            <option
-            value="ES"
-            onMouseEnter={() => ttsEnabled && speak("Spanish", lang)}
-            >
-            Spanish
-            </option>
-            <option
-            value="FR"
-            onMouseEnter={() => ttsEnabled && speak("French", lang)}
-            >
-            French
-            </option>
-            <option
-            value="DE"
-            onMouseEnter={() => ttsEnabled && speak("German", lang)}
-            >
-            German
-            </option>
-            <option
-            value="JA"
-            onMouseEnter={() => ttsEnabled && speak("Japanese", lang)}
-            >
-            Japanese
-            </option>
-            <option
-            value="ZH"
-            onMouseEnter={() => ttsEnabled && speak("Chinese", lang)}
-            >
-            Chinese (Simplified)
-            </option>
-            <option
-            value="KO"
-            onMouseEnter={() => ttsEnabled && speak("Korean", lang)}
-            >
-            Korean
-            </option>
-            <option
-            value="AR"
-            onMouseEnter={() => ttsEnabled && speak("Arabic", lang)}
-            >
-            Arabic
-            </option>
-            <option
-            value="HI"
-            onMouseEnter={() => ttsEnabled && speak("Hindi", lang)}
-            >
-            Hindi
-            </option>
-            <option
-            value="RU"
-            onMouseEnter={() => ttsEnabled && speak("Russian", lang)}
-            >
-            Russian
-            </option>
-            <option
-            value="PT"
-            onMouseEnter={() => ttsEnabled && speak("Portuguese", lang)}
-            >
-            Portuguese
-            </option>
-            <option
-            value="IT"
-            onMouseEnter={() => ttsEnabled && speak("Italian", lang)}
-            >
-            Italian
-            </option>
-            <option
-            value="NL"
-            onMouseEnter={() => ttsEnabled && speak("Dutch", lang)}
-            >
-            Dutch
-            </option>
+      <select
+        id="language-select"
+        value={lang}
+        onChange={(e) => setLang(e.target.value)}
+        onMouseEnter={() => ttsEnabled && speak("Select Language", lang)}
+        className="p-2 border border-gray-300 rounded-md"
+      >
+        <option value="AM" onMouseEnter={() => ttsEnabled && speak("Amharic", lang)}>
+          Amharic
+        </option>
+        <option value="AR" onMouseEnter={() => ttsEnabled && speak("Arabic", lang)}>
+          Arabic
+        </option>
+        <option value="BN" onMouseEnter={() => ttsEnabled && speak("Bengali", lang)}>
+          Bengali
+        </option>
+        <option value="CA" onMouseEnter={() => ttsEnabled && speak("Cantonese", lang)}>
+          Cantonese (Hong Kong)
+        </option>
+        <option value="DE" onMouseEnter={() => ttsEnabled && speak("German", lang)}>
+          German
+        </option>
+        <option value="DU" onMouseEnter={() => ttsEnabled && speak("Dutch", lang)}>
+          Dutch
+        </option>
+        <option value="EN" onMouseEnter={() => ttsEnabled && speak("English", lang)}>
+          English
+        </option>
+        <option value="FA" onMouseEnter={() => ttsEnabled && speak("Farsi", lang)}>
+          Farsi (Persian)
+        </option>
+        <option value="FR" onMouseEnter={() => ttsEnabled && speak("French", lang)}>
+          French
+        </option>
+        <option value="GR" onMouseEnter={() => ttsEnabled && speak("Greek", lang)}>
+          Greek
+        </option>
+        <option value="GU" onMouseEnter={() => ttsEnabled && speak("Gujarati", lang)}>
+          Gujarati
+        </option>
+        <option value="HA" onMouseEnter={() => ttsEnabled && speak("Hausa", lang)}>
+          Hausa
+        </option>
+        <option value="HE" onMouseEnter={() => ttsEnabled && speak("Hebrew", lang)}>
+          Hebrew
+        </option>
+        <option value="HI" onMouseEnter={() => ttsEnabled && speak("Hindi", lang)}>
+          Hindi
+        </option>
+        <option value="IT" onMouseEnter={() => ttsEnabled && speak("Italian", lang)}>
+          Italian
+        </option>
+        <option value="JA" onMouseEnter={() => ttsEnabled && speak("Japanese", lang)}>
+          Japanese
+        </option>
+        <option value="KO" onMouseEnter={() => ttsEnabled && speak("Korean", lang)}>
+          Korean
+        </option>
+        <option value="NL" onMouseEnter={() => ttsEnabled && speak("Dutch", lang)}>
+          Dutch
+        </option>
+        <option value="PA" onMouseEnter={() => ttsEnabled && speak("Punjabi", lang)}>
+          Punjabi
+        </option>
+        <option value="PL" onMouseEnter={() => ttsEnabled && speak("Polish", lang)}>
+          Polish
+        </option>
+        <option value="PT" onMouseEnter={() => ttsEnabled && speak("Portuguese", lang)}>
+          Portuguese
+        </option>
+        <option value="RO" onMouseEnter={() => ttsEnabled && speak("Romanian", lang)}>
+          Romanian
+        </option>
+        <option value="RU" onMouseEnter={() => ttsEnabled && speak("Russian", lang)}>
+          Russian
+        </option>
+        <option value="ES" onMouseEnter={() => ttsEnabled && speak("Spanish", lang)}>
+          Spanish
+        </option>
+        <option value="SV" onMouseEnter={() => ttsEnabled && speak("Swedish", lang)}>
+          Swedish
+        </option>
+        <option value="TA" onMouseEnter={() => ttsEnabled && speak("Tamil", lang)}>
+          Tamil
+        </option>
+        <option value="TH" onMouseEnter={() => ttsEnabled && speak("Thai", lang)}>
+          Thai
+        </option>
+        <option value="TL" onMouseEnter={() => ttsEnabled && speak("Tagalog", lang)}>
+          Tagalog
+        </option>
+        <option value="TR" onMouseEnter={() => ttsEnabled && speak("Turkish", lang)}>
+          Turkish
+        </option>
+        <option value="UK" onMouseEnter={() => ttsEnabled && speak("Ukrainian", lang)}>
+          Ukrainian
+        </option>
+        <option value="UR" onMouseEnter={() => ttsEnabled && speak("Urdu", lang)}>
+          Urdu
+        </option>
+        <option value="VI" onMouseEnter={() => ttsEnabled && speak("Vietnamese", lang)}>
+          Vietnamese
+        </option>
+      </select>
 
-            {/* Additional Languages */}
-            <option
-            value="VI"
-            onMouseEnter={() => ttsEnabled && speak("Vietnamese", lang)}
-            >
-            Vietnamese
-            </option>
-            <option
-            value="TA"
-            onMouseEnter={() => ttsEnabled && speak("Tamil", lang)}
-            >
-            Tamil
-            </option>
-            <option
-            value="UR"
-            onMouseEnter={() => ttsEnabled && speak("Urdu", lang)}
-            >
-            Urdu
-            </option>
-            <option
-            value="FA"
-            onMouseEnter={() => ttsEnabled && speak("Farsi", lang)}
-            >
-            Farsi (Persian)
-            </option>
-            <option
-            value="PL"
-            onMouseEnter={() => ttsEnabled && speak("Polish", lang)}
-            >
-            Polish
-            </option>
-            <option
-            value="TR"
-            onMouseEnter={() => ttsEnabled && speak("Turkish", lang)}
-            >
-            Turkish
-            </option>
-            <option
-            value="EL"
-            onMouseEnter={() => ttsEnabled && speak("Greek", lang)}
-            >
-            Greek
-            </option>
-            <option
-            value="HE"
-            onMouseEnter={() => ttsEnabled && speak("Hebrew", lang)}
-            >
-            Hebrew
-            </option>
-            <option
-            value="AM"
-            onMouseEnter={() => ttsEnabled && speak("Amharic", lang)}
-            >
-            Amharic
-            </option>
-            <option
-            value="HA"
-            onMouseEnter={() => ttsEnabled && speak("Hausa", lang)}
-            >
-            Hausa
-            </option>
-            <option
-            value="TH"
-            onMouseEnter={() => ttsEnabled && speak("Thai", lang)}
-            >
-            Thai
-            </option>
-            <option
-            value="GU"
-            onMouseEnter={() => ttsEnabled && speak("Gujarati", lang)}
-            >
-            Gujarati
-            </option>
-            <option
-            value="PA"
-            onMouseEnter={() => ttsEnabled && speak("Punjabi", lang)}
-            >
-            Punjabi
-            </option>
-            <option
-            value="BN"
-            onMouseEnter={() => ttsEnabled && speak("Bengali", lang)}
-            >
-            Bengali
-            </option>
-            <option
-            value="RO"
-            onMouseEnter={() => ttsEnabled && speak("Romanian", lang)}
-            >
-            Romanian
-            </option>
-            <option
-            value="UK"
-            onMouseEnter={() => ttsEnabled && speak("Ukrainian", lang)}
-            >
-            Ukrainian
-            </option>
-            <option
-            value="SV"
-            onMouseEnter={() => ttsEnabled && speak("Swedish", lang)}
-            >
-            Swedish
-            </option>
-            <option
-            value="TL"
-            onMouseEnter={() => ttsEnabled && speak("Tagalog", lang)}
-            >
-            Tagalog
-            </option>
-            <option
-            value="CMN"
-            onMouseEnter={() => ttsEnabled && speak("Mandarin", lang)}
-            >
-            Mandarin (Taiwan)
-            </option>
-            <option
-            value="YUE"
-            onMouseEnter={() => ttsEnabled && speak("Cantonese", lang)}
-            >
-            Cantonese (Hong Kong)
-            </option>
-        </select>
     </div>
 
       {products.length > 0 && selectedProduct && (
