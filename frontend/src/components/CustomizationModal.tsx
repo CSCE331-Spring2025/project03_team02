@@ -3,6 +3,7 @@ import { ICustomer, IIngredient, IProduct } from "../utils/interfaces";
 import { FaRegTrashAlt } from "react-icons/fa";
 
 import axios from "axios";
+import { useTranslation } from "../utils/useTranslation";
 
 const speak = (text: string) => {
     if ('speechSynthesis' in window) {
@@ -19,9 +20,12 @@ interface Props {
     ingredients: IIngredient[]
     ttsEnabled?: boolean
     customer?: ICustomer | null
+    lang?: string
 }
 
-const CustomizationModal: React.FC<Props> = ({ product, onSubmit, ingredients, ttsEnabled, customer }) => {
+const CustomizationModal: React.FC<Props> = ({ product, onSubmit, ingredients, ttsEnabled, customer, lang = "EN" }) => {
+    const { t, translateTexts } = useTranslation();
+
     const sizes = [
         { label: "small", price: 0 },
         { label: "medium", price: 1.5 },
@@ -44,7 +48,24 @@ const CustomizationModal: React.FC<Props> = ({ product, onSubmit, ingredients, t
     useEffect(() => {
         setProductReviews(product.reviews);
     }, [product]);
-    
+
+    useEffect(() => {
+        // Translate dynamic content when modal opens
+        const modalTexts = [
+            product.name,
+            product.description,
+            product.alerts,
+            "Warning", "Reviews", "Submit", "Cancel",
+            "Customization text input", "Add a review", "Post",
+            "Review Submitted Successfully", "Review Deleted Successfully!", "Something went wrong.", "plus",
+            ...sizes.map(s => s.label),
+            ...ingredients.map(i => i.name)
+        ];
+
+        const filtered = [...new Set(modalTexts.filter(Boolean))];
+        translateTexts(filtered, lang);
+    }, [product, ingredients, lang]);
+
     const submitCustomizations = () => {
         const customizedProduct = { ...product };
         customizedProduct.ingredients = selectedToppings
@@ -63,23 +84,23 @@ const CustomizationModal: React.FC<Props> = ({ product, onSubmit, ingredients, t
 
     const submitReview = async () => {
         if(!customer || reviewText === '') return
-        
+
         const data = {
             'product_id': product.id,
             'customer_id': customer.id,
             'review_text': reviewText
         }
-        
+
         const res = (await axios.post(`${import.meta.env.VITE_API_URL}/addreview`, data))
 
         if(res.status === 200) {
             const submittedReview = res.data.data;
 
             setProductReviews([...productReviews, submittedReview])
-            
-            alert("Review Submitted Successfully");
+
+            alert(t("Review Submitted Successfully"));
         } else {
-            alert("Something went wrong.")
+            alert(t("Something went wrong."))
         }
 
         setReviewText('');
@@ -98,9 +119,9 @@ const CustomizationModal: React.FC<Props> = ({ product, onSubmit, ingredients, t
         if(res.status === 200) {
             setProductReviews([...productReviews.filter(elm => elm.id !== reviewId)]);
 
-            alert("Review Deleted Successfully!")
+            alert(t("Review Deleted Successfully!"))
         } else {
-            alert("Something went wrong.");
+            alert(t("Something went wrong."));
         }
     }
 
@@ -111,7 +132,7 @@ const CustomizationModal: React.FC<Props> = ({ product, onSubmit, ingredients, t
         ));
 
         if (ttsEnabled) {
-            speak(`${product.name}. ${product.description}`);
+            speak(`${t(product.name)}. ${t(product.description)}`);
         }
     }, [ingredients, product, ttsEnabled]);
 
@@ -121,21 +142,21 @@ const CustomizationModal: React.FC<Props> = ({ product, onSubmit, ingredients, t
                 {/* Header */}
                 <div className="flex justify-between items-start border-b pb-4 mb-4">
                     <div>
-                        <h2 className="text-2xl font-bold">{product.name}</h2>
+                        <h2 className="text-2xl font-bold">{t(product.name)}</h2>
                         <p className="text-gray-500 text-sm mt-1">
-                            {product.description}
+                            {t(product.description)}
                         </p>
 
                         <div role="alert" className="alert alert-warning my-2 py-2 w-full">
                             <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 shrink-0 stroke-current" fill="none" viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
                             </svg>
-                            <span>Warning: {product.alerts}</span>
+                            <span>{t("Warning")}: {t(product.alerts)}</span>
                         </div>
 
                         <div className="collapse collapse-arrow bg-base-100 border border-base-300">
                             <input type="radio" name="my-accordion-2" />
-                            <div className="collapse-title font-semibold">Reviews</div>
+                            <div className="collapse-title font-semibold">{t("Reviews")}</div>
                             <div className="collapse-content text-sm space-y-2">
                                 {productReviews.map((review, index) => (
                                     <div key={index} className="flex items-center hover:bg-gray-50 p-5 rounded-xl">
@@ -153,8 +174,8 @@ const CustomizationModal: React.FC<Props> = ({ product, onSubmit, ingredients, t
 
                                 {customer && (
                                     <div className="join w-full">
-                                        <input type="text" value={reviewText} onChange={(evt) => setReviewText(evt.target.value)} className="input w-full join-item" placeholder="Add a review" />
-                                        <button onClick={() => submitReview()} className="btn join-item">Post</button>
+                                        <input type="text" value={reviewText} onChange={(evt) => setReviewText(evt.target.value)} className="input w-full join-item" placeholder={t("Add a review")} />
+                                        <button onClick={() => submitReview()} className="btn join-item">{t("Post")}</button>
                                     </div>
                                 )}
                             </div>
@@ -162,9 +183,7 @@ const CustomizationModal: React.FC<Props> = ({ product, onSubmit, ingredients, t
                         </div>
                     </div>
                     <p className="text-xl font-bold text-gray-800">${product.price}</p>
-
                 </div>
-
 
                 {/* Sizes */}
                 <div className="grid grid-cols-3 gap-3 mb-6">
@@ -172,13 +191,13 @@ const CustomizationModal: React.FC<Props> = ({ product, onSubmit, ingredients, t
                         <button
                             key={index}
                             onClick={() => setSelectedSize(size.label)}
-                            onMouseEnter={() => ttsEnabled && speak(`${size.label}, plus $${size.price.toFixed(2)}`)}
+                            onMouseEnter={() => ttsEnabled && speak(`${t(size.label)}, ${t("plus")}$${size.price.toFixed(2)}`)}
                             className={`p-3 rounded-md text-center ${selectedSize === size.label
                                 ? "bg-green-500 text-white"
                                 : "bg-gray-200 text-gray-800 hover:bg-gray-300"
                                 }`}
                         >
-                            <p className="font-semibold text-sm">{size.label.toUpperCase()}</p>
+                            <p className="font-semibold text-sm">{t(size.label).toUpperCase()}</p>
                             <p className="text-xs">+ ${size.price.toFixed(2)}</p>
                         </button>
                     ))}
@@ -190,25 +209,24 @@ const CustomizationModal: React.FC<Props> = ({ product, onSubmit, ingredients, t
                         <button
                             key={index}
                             onClick={() => toggleTopping(ingredient)}
-                            onMouseEnter={() => ttsEnabled && speak(ingredient.name)}
+                            onMouseEnter={() => ttsEnabled && speak(t(ingredient.name))}
                             className={`p-2 rounded-md text-sm text-center ${selectedToppings.includes(ingredient)
                                 ? "bg-green-500 text-white"
                                 : "bg-gray-100 hover:bg-gray-200"
                                 }`}
                         >
-                            {ingredient.name.toUpperCase()}
+                            {t(ingredient.name).toUpperCase()}
                         </button>
                     ))}
                 </div>
 
-
                 {/* Custom Text Input */}
                 <textarea
-                    placeholder="Customizations text input"
+                    placeholder={t("Customization text input")}
                     className="w-full p-3 mb-6 rounded-md bg-gray-100 text-sm"
                     rows={3}
-                    onMouseEnter={() => ttsEnabled && speak("Customization text input")}
-                    onFocus={() => ttsEnabled && speak("Customization text input")}
+                    onMouseEnter={() => ttsEnabled && speak(t("Customization text input"))}
+                    onFocus={() => ttsEnabled && speak(t("Customization text input"))}
                 />
 
                 {/* Buttons */}
@@ -216,18 +234,18 @@ const CustomizationModal: React.FC<Props> = ({ product, onSubmit, ingredients, t
                     <form method="dialog">
                         <button
                             className="btn bg-red-500 text-white px-6 py-2 rounded-lg hover:bg-red-600 transition"
-                            onMouseEnter={() => ttsEnabled && speak("Cancel")}
+                            onMouseEnter={() => ttsEnabled && speak(t("Cancel"))}
                         >
-                            Cancel
+                            {t("Cancel")}
                         </button>
                     </form>
 
                     <button
                         className="bg-green-500 text-white px-6 py-2 rounded-lg hover:bg-green-600 transition"
                         onClick={submitCustomizations}
-                        onMouseEnter={() => ttsEnabled && speak("Submit")}
+                        onMouseEnter={() => ttsEnabled && speak(t("Submit"))}
                     >
-                        Submit
+                        {t("Submit")}
                     </button>
                 </div>
             </div>
