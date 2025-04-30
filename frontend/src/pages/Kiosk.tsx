@@ -447,6 +447,7 @@ const speak = (text: string, langCode: string = "EN") => {
           onSubmit={addProductToCart}
           ttsEnabled={ttsEnabled}
           customer={customer}
+          lang={lang}
         />
       )}
 
