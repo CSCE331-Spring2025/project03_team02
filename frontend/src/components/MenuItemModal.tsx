@@ -18,22 +18,6 @@ const MenuItemModal: React.FC<MenuItemModalProps> = ({ ingredients, onSuccess })
   const [selectedIngredients, setSelectedIngredients] = useState<{ id: string; quantity: number }[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
-  const [imageFile, setImageFile] = useState<File | null>(null);
-  const [imagePreview, setImagePreview] = useState<string | null>(null);
-
-  // handle image file selection
-  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      setImageFile(file);
-      // create preview url
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setImagePreview(reader.result as string);
-      };
-      reader.readAsDataURL(file);
-    }
-  };
 
   const handleIngredientChange = (ingredientId: string, checked: boolean) => {
     if (checked) {
@@ -67,12 +51,7 @@ const MenuItemModal: React.FC<MenuItemModalProps> = ({ ingredients, onSuccess })
     try {
       const formData = new FormData();
       
-      // add image file if selected
-      if (imageFile) {
-        formData.append('image', imageFile);
-      }
-
-      // add other form data
+      // add form data
       formData.append('name', name);
       formData.append('description', description);
       formData.append('price', priceValue.toString());
@@ -96,8 +75,6 @@ const MenuItemModal: React.FC<MenuItemModalProps> = ({ ingredients, onSuccess })
       setIsSeasonal(false);
       setCustomizations("");
       setSelectedIngredients([]);
-      setImageFile(null);
-      setImagePreview(null);
       
       // Call success callback
       onSuccess();
@@ -152,28 +129,6 @@ const MenuItemModal: React.FC<MenuItemModalProps> = ({ ingredients, onSuccess })
               min="0"
             />
           </div>
-        </div>
-
-        {/* image upload section */}
-        <div className="form-control mb-4">
-          <label className="label">
-            <span className="label-text">Product Image</span>
-          </label>
-          <input
-            type="file"
-            accept="image/*"
-            className="input input-bordered"
-            onChange={handleImageChange}
-          />
-          {imagePreview && (
-            <div className="mt-2">
-              <img 
-                src={imagePreview} 
-                alt="Preview" 
-                className="w-32 h-32 object-cover rounded"
-              />
-            </div>
-          )}
         </div>
         
         <div className="form-control mb-4">

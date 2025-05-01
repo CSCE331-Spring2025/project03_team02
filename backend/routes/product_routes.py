@@ -130,25 +130,6 @@ This endpoint creates a new menu item (regular or seasonal) with the provided de
 @product_routes_bp.route("/addmenuitem", methods=['POST'])
 def add_menu_item():
     try:
-        # handle image upload
-        image_file = request.files.get('image')
-        image_url = None
-
-        if image_file:
-            if not allowed_file(image_file.filename):
-                return jsonify({'error': 'Invalid file type. Allowed types: png, jpg, jpeg, gif'}), 400
-            
-            try:
-                # Get the filename and strip the extension
-                filename = os.path.splitext(secure_filename(image_file.filename))[0]
-                # save file with product id as prefix
-                image_url = filename
-                file_path = os.path.join(UPLOAD_FOLDER, f"{filename}.png")
-                image_file.save(file_path)
-            except Exception as e:
-                print(f"Error saving image: {str(e)}")
-                return jsonify({'error': f'Failed to save image: {str(e)}'}), 500
-
         # extract product details from request
         name = request.form.get('name')
         description = request.form.get('description')
@@ -174,8 +155,7 @@ def add_menu_item():
             customizations=customizations,
             has_boba=has_boba,
             alerts=alerts,
-            is_seasonal=is_seasonal,
-            image_url=image_url
+            is_seasonal=is_seasonal
         )
 
         db.session.add(new_product)
@@ -213,8 +193,7 @@ def add_menu_item():
                 'price': float(new_product.price),
                 'customizations': new_product.customizations,
                 'has_boba': new_product.has_boba,
-                'is_seasonal': new_product.is_seasonal,
-                'image_url': new_product.image_url
+                'is_seasonal': new_product.is_seasonal
             }
         })
 

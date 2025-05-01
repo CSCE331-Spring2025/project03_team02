@@ -18,42 +18,12 @@ const NewItemModal: React.FC<Props> = ({ showModal, onClose, onSubmit, tableType
     const [customizations, setCustomizations] = useState('');
     const [alerts, setAlert] = useState('');
     const [boba, setBoba] = useState<'Yes' | 'No'>('No');
-    const [imageFile, setImageFile] = useState<File | null>(null);
-    const [imagePreview, setImagePreview] = useState<string | null>(null);
-
-    // handle image file selection
-    const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const file = e.target.files?.[0];
-        if (file) {
-            setImageFile(file);
-            // create preview url
-            const reader = new FileReader();
-            reader.onloadend = () => {
-                setImagePreview(reader.result as string);
-            };
-            reader.readAsDataURL(file);
-        }
-    };
 
     // handle form submission
     const handleFormSubmit = async () => {
         if (tableType === 'Products') {
-            const formData = new FormData();
-            
-            // add image file if selected
-            if (imageFile) {
-                formData.append('image', imageFile);
-            }
-
-            // add other form data
             const newItem = { id, name, description, price: parseFloat(price), customizations, boba, alerts };
-
-            // append all form fields to FormData
-            Object.entries(newItem).forEach(([key, value]) => {
-                formData.append(key, value.toString());
-            });
-
-            onSubmit(formData);
+            onSubmit(newItem);
         } else {
             // For ingredients, send as JSON
             const newItem = { 
@@ -97,26 +67,6 @@ const NewItemModal: React.FC<Props> = ({ showModal, onClose, onSubmit, tableType
 
                             {tableType === 'Products' ? (
                                 <>
-                                    {/* image upload section */}
-                                    <div className="mb-4">
-                                        <label className="block mb-2">Product Image</label>
-                                        <input
-                                            type="file"
-                                            accept="image/*"
-                                            className="border p-2 w-full rounded"
-                                            onChange={handleImageChange}
-                                        />
-                                        {imagePreview && (
-                                            <div className="mt-2">
-                                                <img 
-                                                    src={imagePreview} 
-                                                    alt="Preview" 
-                                                    className="w-32 h-32 object-cover rounded"
-                                                />
-                                            </div>
-                                        )}
-                                    </div>
-
                                     <div className="mb-4">
                                         <label className="block mb-2">Description</label>
                                         <input
